@@ -1,0 +1,17 @@
+{
+    zenith: Arcsecond(0),
+    azimuth: Arcsecond(0),
+    n_radial_order: 5,
+    pupil_mode: Segment{
+        sid: 1,
+        mirror: M1({
+            t_xyz: (Mu(0), Mu(0), Mu(0)),
+            r_xyz: (Arcsecond(0), Arcsecond(0), Arcsecond(0)),
+        }),
+        zeroed: true,
+    },
+    coefs_format: {
+        width: 8,
+        precision: 0,
+    },
+}
