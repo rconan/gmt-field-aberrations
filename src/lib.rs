@@ -1,6 +1,4 @@
 mod field;
-pub mod mirror;
-pub mod segment;
 mod zernike;
 pub use field::Field;
 use serde::{Deserialize, Serialize};

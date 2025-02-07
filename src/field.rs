@@ -4,7 +4,10 @@ use crseo::CrseoError;
 use serde::{Deserialize, Serialize};
 use skyangle::SkyAngle;
 
-use crate::{mirror, segment, zernike::Projection, CoefsFormat, PupilMode};
+use crate::{zernike::Projection, CoefsFormat, PupilMode};
+
+mod mirror;
+mod segment;
 
 #[derive(Debug, thiserror::Error)]
 pub enum FieldError {
@@ -65,12 +68,12 @@ impl Field {
         let z = self.zenith.to_radians();
         let a = self.azimuth.to_radians();
         Ok(match &self.pupil_mode {
-            PupilMode::Full => mirror::field_zernike(z, a, self.n_radial_order)?,
+            PupilMode::Full => self.mirror(z, a)?,
             PupilMode::Segment {
                 sid,
                 mirror,
                 zeroed,
-            } => segment::field_zernike(*sid, z, a, self.n_radial_order, mirror, *zeroed)?,
+            } => self.segment(*sid, z, a, mirror, *zeroed)?,
         }
         .coefficients_formatting(self.coefs_format.clone()))
     }
