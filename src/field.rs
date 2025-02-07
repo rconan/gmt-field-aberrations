@@ -80,6 +80,10 @@ impl Field {
 }
 impl Display for Field {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", rson_rs::ser::pretty::to_string(self).unwrap())
+        write!(
+            f,
+            "{}",
+            ron::ser::to_string_pretty(self, Default::default()).unwrap()
+        )
     }
 }

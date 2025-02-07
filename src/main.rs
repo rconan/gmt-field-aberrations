@@ -15,8 +15,8 @@ pub struct Data {
 fn main() -> color_eyre::Result<()> {
     env_logger::init();
 
-    let file = File::open(Path::new(env!("CARGO_MANIFEST_DIR")).join("config.rson"))?;
-    let field: Field = rson_rs::de::from_reader(&file)?;
+    let file = File::open(Path::new(env!("CARGO_MANIFEST_DIR")).join("config.ron"))?;
+    let field: Field = ron::de::from_reader(&file)?;
     println!("{:-<100}", "");
     println!("{field}");
     let zernp = field.zernike()?;

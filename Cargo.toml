@@ -15,4 +15,4 @@ skyangle = { version = "0.3.0", path = "/home/ubuntu/projects/skyangle", feature
 thiserror = "2.0.11"
 zernike = "0.2.1"
 color-eyre = "0.6.3"
-rson_rs = "0.2.1"
+ron = "0.8.1"

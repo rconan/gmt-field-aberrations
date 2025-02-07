@@ -1,6 +1,0 @@
-{
-    zenith: Arcsecond(0),
-    azimuth: Arcsecond(0),
-    n_radial_order: 5,
-    pupil_mode: Full,
-}

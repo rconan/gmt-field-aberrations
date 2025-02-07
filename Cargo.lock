@@ -107,6 +107,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "base64"
+version = "0.21.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9d297deb1925b89f2ccc13d7635fa0714f12c87adce1c75356b39ca9b7178567"
+
+[[package]]
 name = "bindgen"
 version = "0.70.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -131,6 +137,9 @@ name = "bitflags"
 version = "2.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8f68f53c83ab957f72c32642f3868eec03eb974d1fb82e453128456482613d36"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "bumpalo"
@@ -384,8 +393,8 @@ dependencies = [
  "env_logger",
  "geotrans",
  "log",
+ "ron",
  "rson",
- "rson_rs",
  "serde",
  "serde-pickle",
  "skyangle 0.3.0",
@@ -785,6 +794,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2b15c43186be67a4fd63bee50d0303afffcef381492ebe2c5d87f324e1b8815c"
 
 [[package]]
+name = "ron"
+version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b91f7eff05f748767f183df4320a63d6936e9c6107d97c9e6bdd9784f4289c94"
+dependencies = [
+ "base64",
+ "bitflags",
+ "serde",
+ "serde_derive",
+]
+
+[[package]]
 name = "roots"
 version = "0.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -795,15 +816,6 @@ name = "rson"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "17a5900c56a4a4e73edb15bceab2bb26118ef4ea5abb430999a6d737039edc1c"
-
-[[package]]
-name = "rson_rs"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "78e2019a35043d0222ba7e2abb09ad304a7b1995b2aa5e89937ed62d1f470969"
-dependencies = [
- "serde",
-]
 
 [[package]]
 name = "rustc-demangle"
