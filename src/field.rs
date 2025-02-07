@@ -15,13 +15,19 @@ pub enum FieldError {
 }
 type Result<T> = std::result::Result<T, FieldError>;
 
+/// Field location
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Field {
-    zenith: SkyAngle<f32>,
-    azimuth: SkyAngle<f32>,
-    n_radial_order: u32,
-    pupil_mode: PupilMode,
-    coefs_format: CoefsFormat,
+    /// zenith angle
+    pub zenith: SkyAngle<f32>,
+    /// azimuth angle
+    pub azimuth: SkyAngle<f32>,
+    /// Zernike basis radial order
+    pub n_radial_order: u32,
+    /// exit pupil definition
+    pub pupil_mode: PupilMode,
+    /// Zernike coefficients formatting
+    pub coefs_format: CoefsFormat,
 }
 impl Default for Field {
     fn default() -> Self {
@@ -35,12 +41,14 @@ impl Default for Field {
     }
 }
 impl Field {
+    /// Creates a new field instance
     pub fn new(n_radial_order: u32) -> Self {
         Self {
             n_radial_order,
             ..Default::default()
         }
     }
+    /// Sets the GMT pointing direction
     pub fn pointing(self, zenith: SkyAngle<f32>, azimuth: SkyAngle<f32>) -> Self {
         Self {
             zenith,
@@ -48,9 +56,11 @@ impl Field {
             ..self
         }
     }
+    /// Configures the pupil
     pub fn pupil_mode(self, pupil_mode: PupilMode) -> Self {
         Self { pupil_mode, ..self }
     }
+    /// Returns the [Projections] of the exit pupil wavefront onto the Zernike basis
     pub fn zernike(&self) -> Result<Projection> {
         let z = self.zenith.to_radians();
         let a = self.azimuth.to_radians();

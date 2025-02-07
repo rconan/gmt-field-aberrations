@@ -5,6 +5,7 @@ use zernike::{gram_schmidt, jnm, zernike};
 
 use crate::CoefsFormat;
 
+/// Zernike modal basis
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ZernikeBasis {
     xy: Rc<[[f64; 2]]>,
@@ -13,6 +14,7 @@ pub struct ZernikeBasis {
     modes: Vec<f64>,
 }
 impl ZernikeBasis {
+    /// Creates a new Zernike basis instance
     pub fn new(n_radial_order: u32, xy: &[[f64; 2]]) -> Self {
         let (mut r, o): (Vec<_>, Vec<_>) = xy
             .iter()
@@ -46,6 +48,7 @@ impl ZernikeBasis {
         }
     }
 }
+/// Projection onto a Zernike basis
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Projection {
     basis: Rc<ZernikeBasis>,
@@ -54,6 +57,7 @@ pub struct Projection {
     coefs_format: CoefsFormat,
 }
 impl Projection {
+    /// Creates a new [Projection] instance
     pub fn new(basis: impl Into<Rc<ZernikeBasis>>) -> Self {
         Self {
             basis: basis.into(),
@@ -62,10 +66,12 @@ impl Projection {
             coefs_format: Default::default(),
         }
     }
+    /// Sets the formatting parameters for the Zernike coefficients
     pub fn coefficients_formatting(mut self, coefs_format: CoefsFormat) -> Self {
         self.coefs_format = coefs_format;
         self
     }
+    /// Projects the wavefront onto the Zernike modes
     pub fn project(&mut self, opd: impl Into<Rc<[f32]>>) -> &mut Self {
         self.opd = opd.into();
         let n = self.opd.len();
@@ -84,23 +90,11 @@ impl Projection {
             .collect();
         self
     }
+    /// Returns the Zernike projections coefficients
     pub fn coefficients(&self) -> &[f64] {
         &self.coefficients
     }
-    // fn stats(&self) -> (f64, f64) {
-    //     let (mut mean, mut mean_squared) =
-    //         self.coefficients
-    //             .iter()
-    //             .fold((0f64, 0f64), |(mut x, mut y), c| {
-    //                 x += c;
-    //                 y += c * c;
-    //                 (x, y)
-    //             });
-    //     let n = self.coefficients.len() as f64;
-    //     mean /= n;
-    //     mean_squared /= n;
-    //     (mean, mean_squared)
-    // }
+    /// Returns the wavefront standard deviation in nanometers
     pub fn opd_std(&self) -> f32 {
         if self.opd.is_empty() {
             return 0f32;
@@ -116,9 +110,11 @@ impl Projection {
         mean_squared /= n;
         1e9 * (mean_squared - mean * mean).sqrt()
     }
+    /// Returns the root sum squared of the coefficients
     pub fn rms(&self) -> f64 {
         self.coefficients.iter().map(|&x| x * x).sum::<f64>().sqrt()
     }
+    /// Returns the root sum squared of the coefficients ommiting the piston mode
     pub fn std(&self) -> f64 {
         self.coefficients
             .iter()

@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use skyangle::SkyAngle;
 use zernike::{Projection, ZernikeBasis};
 
+/// Units for RBM translations
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Txyz {
     /// Microns
@@ -20,6 +21,7 @@ impl Default for Txyz {
     }
 }
 impl Txyz {
+    /// Returns the translation value in meters
     pub fn as_f64(&self) -> f64 {
         match self {
             Txyz::Mu(x) => *x * 1e-6,
@@ -27,30 +29,40 @@ impl Txyz {
         }
     }
 }
+/// Rigid body motions
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct Rbm {
+    /// Translations
     pub t_xyz: [Txyz; 3],
+    /// Rotations
     pub r_xyz: [SkyAngle<f64>; 3],
 }
+/// GMT mirror selection
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Mirror {
     M1(Rbm),
     M2(Rbm),
 }
+/// GMT pupil either full or restrict to segment
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
 pub enum PupilMode {
     #[default]
     Full,
     Segment {
+        /// segment id \[1,7\]
         sid: i32,
+        /// segment [Rbm]
         mirror: Mirror,
+        /// either remove the collimated wavefront or not
         zeroed: bool,
     },
 }
-
+/// Zernike coefficients formatting
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CoefsFormat {
+    /// format width
     pub width: usize,
+    /// format precision
     pub precision: usize,
 }
 impl Default for CoefsFormat {
