@@ -1,47 +1,13 @@
-use std::vec;
-
 use faer::{MatMut, MatRef};
-use gmt_field_aberrations::{Field, Mirror, PupilMode, Rbm};
-use gmt_field_aberrations::{Rxyz, Txyz};
+use gmt_field_aberrations::{
+    segment::{
+        dof::Dof,
+        rbm::Rbm,
+        units::{Rxyz, Txyz},
+    },
+    Field, Mirror, PupilMode,
+};
 use skyangle::{Conversion, SkyAngle};
-
-#[derive(Debug, Clone, Copy)]
-pub enum Dof {
-    Tx(Txyz),
-    Ty(Txyz),
-    Rx(Rxyz),
-    Ry(Rxyz),
-}
-impl Dof {
-    pub fn into_iter() -> vec::IntoIter<Dof> {
-        vec![
-            Dof::Tx(Txyz::Mu(1.)),
-            Dof::Ty(Txyz::Mu(1.)),
-            Dof::Rx(Rxyz::Arcsecond(1.)),
-            Dof::Ry(Rxyz::Arcsecond(1.)),
-        ]
-        .into_iter()
-    }
-    pub fn as_f64(&self) -> f64 {
-        match self {
-            Dof::Tx(txyz) | Dof::Ty(txyz) => txyz.as_f64(),
-            Dof::Rx(sky_angle) | Dof::Ry(sky_angle) => sky_angle.to_radians(),
-        }
-    }
-    pub fn len() -> usize {
-        4
-    }
-}
-impl From<Dof> for Rbm {
-    fn from(value: Dof) -> Self {
-        match value {
-            Dof::Tx(txyz) => Rbm::t_x(txyz),
-            Dof::Ty(txyz) => Rbm::t_y(txyz),
-            Dof::Rx(sky_angle) => Rbm::r_x(sky_angle),
-            Dof::Ry(sky_angle) => Rbm::r_y(sky_angle),
-        }
-    }
-}
 
 pub fn get_coefs(
     sid: i32,
@@ -80,9 +46,9 @@ fn main() -> color_eyre::Result<()> {
     env_logger::init();
 
     let n_radial_order = 4;
-    let sid = 1;
-    let skip = 4;
-    let take = 4;
+    let sid = 7;
+    let skip = 3;
+    let take = 10 - skip;
 
     let mut calib = Vec::<f64>::new();
     let azimuth = [0, 120, 240];
@@ -103,6 +69,7 @@ fn main() -> color_eyre::Result<()> {
     let svd = mat.thin_svd().unwrap();
     let s: Vec<_> = svd.S().column_vector().iter().collect();
     dbg!(&s);
+    // println!("{:.3?}", svd.U());
     let cond = s[0] / *s.last().unwrap();
     println!("Cond.: {cond}");
 
@@ -110,7 +77,7 @@ fn main() -> color_eyre::Result<()> {
     get_coefs(
         sid,
         n_radial_order,
-        Rbm::t_x(Txyz::Mu(10.)),
+        Rbm::t_x(Txyz::Mu(1.)),
         azimuth,
         skip,
         take,
@@ -131,7 +98,7 @@ fn main() -> color_eyre::Result<()> {
         + Rbm::t_y(Txyz::to_mu(*x[1]))
         + Rbm::r_x(Rxyz::Arcsecond(x[2].to_arcsec()))
         + Rbm::r_y(Rxyz::Arcsecond(x[3].to_arcsec()));
-    dbg!(&rbm);
+    println!("{:.0?}", &rbm);
 
     Ok(())
 }
