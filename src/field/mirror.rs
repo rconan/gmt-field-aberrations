@@ -1,6 +1,10 @@
 use crseo::{gmt, utilities::MaskFilter, Builder, FromBuilder, Source};
 
-use crate::{field::FieldError, Field, Projection, ZernikeBasis};
+use crate::{
+    field::FieldError,
+    zernike::{Projection, ZernikeBasis},
+    Field,
+};
 
 type Result<T> = std::result::Result<T, FieldError>;
 

@@ -2,7 +2,12 @@ use crseo::{gmt, utilities::MaskFilter, Builder, FromBuilder, Source};
 use geotrans::{Segment, SegmentTrait, Transform, M1};
 use skyangle::SkyAngle;
 
-use crate::{field::FieldError, Field, Mirror, Projection, Rbm, Txyz, ZernikeBasis};
+use crate::{
+    field::FieldError,
+    segment::{rbm::Rbm, units::Txyz},
+    zernike::{Projection, ZernikeBasis},
+    Field, Mirror,
+};
 
 type Result<T> = std::result::Result<T, FieldError>;
 
