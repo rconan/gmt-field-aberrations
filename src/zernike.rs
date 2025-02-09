@@ -14,7 +14,8 @@ pub struct ZernikeBasis {
     modes: Vec<f64>,
 }
 impl ZernikeBasis {
-    /// Creates a new Zernike basis instance
+    /// Creates a new Zernike basis instance with the number of radial orders
+    /// and \[x,y\] coordinates
     pub fn new(n_radial_order: u32, xy: &[[f64; 2]]) -> Self {
         let (mut r, o): (Vec<_>, Vec<_>) = xy
             .iter()

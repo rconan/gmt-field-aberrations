@@ -25,7 +25,7 @@ pub struct Field {
     pub zenith: SkyAngle<f32>,
     /// azimuth angle
     pub azimuth: SkyAngle<f32>,
-    /// Zernike basis radial order
+    /// Zernike basis number of radial order
     pub n_radial_order: u32,
     /// exit pupil definition
     pub pupil_mode: PupilMode,

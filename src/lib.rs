@@ -4,7 +4,7 @@ mod field;
 pub mod segment;
 mod zernike;
 
-pub use field::Field;
+pub use field::{Field, FieldError};
 use segment::rbm::Rbm;
 
 /// GMT mirror selection
