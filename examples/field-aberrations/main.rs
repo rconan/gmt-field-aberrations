@@ -4,7 +4,7 @@ use gmt_field_aberrations::Field;
 
 fn main() -> color_eyre::Result<()> {
     let azimuth = skyangle::SkyAngle::Degree(0.);
-    let aberrations = (0..21)
+    let aberrations = (-20..21)
         .map(|i| {
             let zenith = skyangle::SkyAngle::Arcminute(0.5 * i as f32);
             let field = Field::new(5).pointing(zenith, azimuth);
