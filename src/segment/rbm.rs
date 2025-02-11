@@ -1,4 +1,4 @@
-use std::ops::Add;
+use std::ops::{Add, Neg, Sub};
 
 use serde::{Deserialize, Serialize};
 use skyangle::Conversion;
@@ -82,6 +82,54 @@ impl Add for Rbm {
             .into_iter()
             .zip(rr.into_iter())
             .map(|(x, y)| x.to_radians() + y.to_radians())
+            .map(|z| Rxyz::MilliArcsec(z.to_mas()))
+            .collect();
+        Rbm {
+            t_xyz: ta.try_into().unwrap(),
+            r_xyz: ra.try_into().unwrap(),
+        }
+    }
+}
+impl Sub for Rbm {
+    type Output = Rbm;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        let Rbm { t_xyz: t, r_xyz: r } = self;
+        let Rbm {
+            t_xyz: tt,
+            r_xyz: rr,
+        } = rhs;
+        let ta: Vec<_> = t
+            .into_iter()
+            .zip(tt.into_iter())
+            .map(|(x, y)| x.as_f64() - y.as_f64())
+            .map(|z| Txyz::Nm(1e9 * z))
+            .collect();
+        let ra: Vec<_> = r
+            .into_iter()
+            .zip(rr.into_iter())
+            .map(|(x, y)| x.to_radians() - y.to_radians())
+            .map(|z| Rxyz::MilliArcsec(z.to_mas()))
+            .collect();
+        Rbm {
+            t_xyz: ta.try_into().unwrap(),
+            r_xyz: ra.try_into().unwrap(),
+        }
+    }
+}
+impl Neg for Rbm {
+    type Output = Rbm;
+
+    fn neg(self) -> Self::Output {
+        let Rbm { t_xyz: t, r_xyz: r } = self;
+        let ta: Vec<_> = t
+            .into_iter()
+            .map(|x| -x.as_f64())
+            .map(|z| Txyz::Nm(1e9 * z))
+            .collect();
+        let ra: Vec<_> = r
+            .into_iter()
+            .map(|x| -x.to_radians())
             .map(|z| Rxyz::MilliArcsec(z.to_mas()))
             .collect();
         Rbm {

@@ -12,11 +12,12 @@ pub struct ZernikeBasis {
     n_radial_order: u32,
     n_mode: usize,
     modes: Vec<f64>,
+    sids: Option<Vec<i32>>,
 }
 impl ZernikeBasis {
     /// Creates a new Zernike basis instance with the number of radial orders
     /// and \[x,y\] coordinates
-    pub fn new(n_radial_order: u32, xy: &[[f64; 2]]) -> Self {
+    pub fn new(n_radial_order: u32, xy: &[[f64; 2]], sids: Option<Vec<i32>>) -> Self {
         let (mut r, o): (Vec<_>, Vec<_>) = xy
             .iter()
             .map(|x| (x[0].hypot(x[1]), x[1].atan2(x[0])))
@@ -46,6 +47,7 @@ impl ZernikeBasis {
             n_radial_order,
             modes: gram_schmidt(&zern, n_mode),
             n_mode,
+            sids,
         }
     }
 }

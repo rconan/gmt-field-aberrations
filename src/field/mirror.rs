@@ -23,7 +23,17 @@ impl Field {
             .filter(src.rays().coordinates().chunks(3))
             .map(|c| [c[0], c[1]])
             .collect();
-        let zern = ZernikeBasis::new(self.n_radial_order, &xy);
+        let zern = ZernikeBasis::new(
+            self.n_radial_order,
+            &xy,
+            Some(
+                src.rays()
+                    .mask()
+                    .filter(src.rays().segment().iter())
+                    .cloned()
+                    .collect(),
+            ),
+        );
         let opd: Vec<_> = src
             .rays()
             .mask()

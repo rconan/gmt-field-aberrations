@@ -1,10 +1,8 @@
 use crseo::{gmt, utilities::MaskFilter, Builder, FromBuilder, Source};
 use geotrans::{Segment, SegmentTrait, Transform, M1};
-use skyangle::SkyAngle;
 
 use crate::{
     field::FieldError,
-    segment::{rbm::Rbm, units::Txyz},
     zernike::{Projection, ZernikeBasis},
     Field, Mirror,
 };
@@ -49,30 +47,13 @@ impl Field {
         // selecting the GMT segment
         gmt.keep(&[sid]);
 
-        let to_meters =
-            |t_xyz: &[Txyz; 3]| t_xyz.into_iter().map(|x| x.as_f64()).collect::<Vec<f64>>();
-
-        let to_radians = |r_xyz: &[SkyAngle<f64>; 3]| {
-            r_xyz
-                .into_iter()
-                .map(|x| x.to_radians())
-                .collect::<Vec<f64>>()
-        };
-
         let zernp = if zeroed {
             // reference source (unperturbed GMT)
             let mut src_ref = Source::builder().zenith_azimuth(vec![z], vec![a]).build()?;
             src_ref.through(&mut gmt).xpupil();
 
             // probing source (perturbed GMT)
-            match mirror {
-                Mirror::M1(Rbm { t_xyz, r_xyz }) => {
-                    gmt.m1_segment_state(sid, &to_meters(t_xyz), &to_radians(r_xyz))
-                }
-                Mirror::M2(Rbm { t_xyz, r_xyz }) => {
-                    gmt.m2_segment_state(sid, &to_meters(t_xyz), &to_radians(r_xyz))
-                }
-            }
+            mirror.apply_rbms(sid, &mut gmt);
             let mut src = Source::builder().zenith_azimuth(vec![z], vec![a]).build()?;
             src.through(&mut gmt).xpupil();
 
@@ -83,7 +64,7 @@ impl Field {
                 .map(|c| [c[0] - xyz_chief[0], c[1] - xyz_chief[1]])
                 .collect();
             log::info!("segment rays #: {}", xy.len());
-            let zern = ZernikeBasis::new(self.n_radial_order, &xy);
+            let zern = ZernikeBasis::new(self.n_radial_order, &xy, None);
 
             // opd wrt to reference
             let opd: Vec<_> = src
@@ -103,14 +84,7 @@ impl Field {
             zernp
         } else {
             // probing source (perturbed GMT)
-            match mirror {
-                Mirror::M1(Rbm { t_xyz, r_xyz }) => {
-                    gmt.m1_segment_state(sid, &to_meters(t_xyz), &to_radians(r_xyz))
-                }
-                Mirror::M2(Rbm { t_xyz, r_xyz }) => {
-                    gmt.m2_segment_state(sid, &to_meters(t_xyz), &to_radians(r_xyz))
-                }
-            }
+            mirror.apply_rbms(sid, &mut gmt);
             let mut src = Source::builder().zenith_azimuth(vec![z], vec![a]).build()?;
             src.through(&mut gmt).xpupil();
 
@@ -123,7 +97,7 @@ impl Field {
                 .map(|c| [c[0] - xyz_chief[0], c[1] - xyz_chief[1]])
                 .collect();
             log::info!("segment rays #: {}", xy.len());
-            let zern = ZernikeBasis::new(self.n_radial_order, &xy);
+            let zern = ZernikeBasis::new(self.n_radial_order, &xy, None);
 
             // opd wrt to reference
             let opd = src.phase().iter();
