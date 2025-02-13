@@ -14,6 +14,15 @@ pub enum Mirror {
     Both(Rbm, Rbm),
 }
 impl Mirror {
+    pub fn m1(dof: impl Into<Rbm>) -> Self {
+        Self::M1(dof.into())
+    }
+    pub fn m2(dof: impl Into<Rbm>) -> Self {
+        Self::M2(dof.into())
+    }
+    pub fn both(dof1: impl Into<Rbm>, dof2: impl Into<Rbm>) -> Self {
+        Self::Both(dof1.into(), dof2.into())
+    }
     pub fn apply_rbms(&self, sid: i32, gmt: &mut Gmt) {
         let to_meters =
             |t_xyz: &[Txyz; 3]| t_xyz.into_iter().map(|x| x.as_f64()).collect::<Vec<f64>>();

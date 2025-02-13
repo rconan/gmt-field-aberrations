@@ -2,11 +2,13 @@ use serde::{Deserialize, Serialize};
 
 mod field;
 mod mirror;
+mod probe;
 pub mod segment;
 mod zernike;
 
 pub use field::{Field, FieldError};
 pub use mirror::Mirror;
+pub use probe::Probes;
 
 /// GMT pupil either full or restrict to segment
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
@@ -34,6 +36,14 @@ impl PupilMode {
         Self::Segment {
             sid,
             mirror: Mirror::M2(Default::default()),
+            zeroed: true,
+        }
+    }
+
+    pub fn segment(sid: i32, mirror: Mirror) -> Self {
+        Self::Segment {
+            sid,
+            mirror,
             zeroed: true,
         }
     }

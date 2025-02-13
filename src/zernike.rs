@@ -1,4 +1,4 @@
-use std::{fmt::Display, rc::Rc};
+use std::{fmt::Display, sync::Arc};
 
 use serde::{Deserialize, Serialize};
 use zernike::{gram_schmidt, jnm, zernike};
@@ -8,7 +8,7 @@ use crate::CoefsFormat;
 /// Zernike modal basis
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ZernikeBasis {
-    xy: Rc<[[f64; 2]]>,
+    xy: Arc<[[f64; 2]]>,
     n_radial_order: u32,
     n_mode: usize,
     modes: Vec<f64>,
@@ -52,16 +52,16 @@ impl ZernikeBasis {
     }
 }
 /// Projection onto a Zernike basis
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Projection {
-    basis: Rc<ZernikeBasis>,
+    basis: Arc<ZernikeBasis>,
     coefficients: Vec<f64>,
-    opd: Rc<[f32]>,
+    opd: Arc<[f32]>,
     coefs_format: CoefsFormat,
 }
 impl Projection {
     /// Creates a new [Projection] instance
-    pub fn new(basis: impl Into<Rc<ZernikeBasis>>) -> Self {
+    pub fn new(basis: impl Into<Arc<ZernikeBasis>>) -> Self {
         Self {
             basis: basis.into(),
             coefficients: Vec::new(),
@@ -75,7 +75,7 @@ impl Projection {
         self
     }
     /// Projects the wavefront onto the Zernike modes
-    pub fn project(&mut self, opd: impl Into<Rc<[f32]>>) -> &mut Self {
+    pub fn project(&mut self, opd: impl Into<Arc<[f32]>>) -> &mut Self {
         self.opd = opd.into();
         let n = self.opd.len();
         assert_eq!(n, self.basis.modes.len() / self.basis.n_mode);
