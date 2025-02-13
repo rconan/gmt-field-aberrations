@@ -319,7 +319,7 @@ dependencies = [
  "rayon",
  "roots",
  "serde",
- "serde-pickle",
+ "serde-pickle 1.2.0",
  "skyangle 0.2.2",
  "thiserror 1.0.69",
  "toml",
@@ -680,12 +680,14 @@ dependencies = [
  "faer",
  "geotrans",
  "log",
+ "rayon",
  "ron",
  "rson",
  "serde",
- "serde-pickle",
+ "serde-pickle 1.2.0",
  "skyangle 0.3.0",
  "thiserror 2.0.11",
+ "triangle-rs",
  "zernike",
 ]
 
@@ -753,6 +755,12 @@ name = "is_terminal_polyfill"
 version = "1.70.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7943c866cc5cd64cbc25b2e01621d07fa8eb2a1a23160ee81ce38704e97b8ecf"
+
+[[package]]
+name = "iter-read"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c397ca3ea05ad509c4ec451fea28b4771236a376ca1c69fd5143aae0cf8f93c4"
 
 [[package]]
 name = "iter-read"
@@ -889,8 +897,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13f27ea175875c472b3df61ece89a6d6ef4e0627f43704e400c782f174681ebd"
 dependencies = [
  "byteorder",
- "num-bigint",
+ "num-bigint 0.4.6",
  "py_literal",
+]
+
+[[package]]
+name = "num-bigint"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5f6f7833f2cbf2360a6cfd58cd41a53aa7a90bd4c202f5b1c7dd2ed73c57b2c3"
+dependencies = [
+ "autocfg",
+ "num-integer",
+ "num-traits",
 ]
 
 [[package]]
@@ -930,7 +949,7 @@ version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f83d14da390562dca69fc84082e73e548e1ad308d24accdedd2720017cb37824"
 dependencies = [
- "num-bigint",
+ "num-bigint 0.4.6",
  "num-integer",
  "num-traits",
 ]
@@ -1083,7 +1102,7 @@ version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "102df7a3d46db9d3891f178dcc826dc270a6746277a9ae6436f8d29fd490a8e1"
 dependencies = [
- "num-bigint",
+ "num-bigint 0.4.6",
  "num-complex",
  "num-traits",
  "pest",
@@ -1280,13 +1299,26 @@ dependencies = [
 
 [[package]]
 name = "serde-pickle"
+version = "0.6.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9b88454094f5ba5b2149722f41e42395b39556632c3abb068540c0b04d27017a"
+dependencies = [
+ "byteorder",
+ "iter-read 0.3.1",
+ "num-bigint 0.3.3",
+ "num-traits",
+ "serde",
+]
+
+[[package]]
+name = "serde-pickle"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b641fdc8bcf2781ee78b30c599700d64ad4f412976143e4c5d0b9df906bb4843"
 dependencies = [
  "byteorder",
- "iter-read",
- "num-bigint",
+ "iter-read 1.1.0",
+ "num-bigint 0.4.6",
  "num-traits",
  "serde",
 ]
@@ -1514,6 +1546,18 @@ dependencies = [
  "sharded-slab",
  "thread_local",
  "tracing-core",
+]
+
+[[package]]
+name = "triangle-rs"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "79ac44bc2f0ee09d28aa800477217b73e77bd0f61668056e9d71687ba76ace4c"
+dependencies = [
+ "cc",
+ "rayon",
+ "serde",
+ "serde-pickle 0.6.3",
 ]
 
 [[package]]

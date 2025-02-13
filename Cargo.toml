@@ -20,3 +20,4 @@ rayon = "1.10.0"
 
 [dev-dependencies]
 faer = "0.21.4"
+triangle-rs = "0.1.2"
