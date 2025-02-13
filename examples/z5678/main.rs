@@ -27,7 +27,7 @@ pub fn get_coefs(
             zeroed: true,
         };
         let gs = Field::new(n_radial_order)
-            .pointing(SkyAngle::Arcminute(6.), SkyAngle::Degree(az as f32))
+            .pointing((SkyAngle::Arcminute(6.), SkyAngle::Degree(az as f32)))
             .pupil_mode(pupil_mode);
         // println!("{gs}");
         let zernp = gs.zernike()?;
@@ -85,7 +85,7 @@ fn main() -> color_eyre::Result<()> {
     };
     for az in azimuth {
         let zernp = Field::new(n_radial_order)
-            .pointing(SkyAngle::Arcminute(6.), SkyAngle::Degree(az as f32))
+            .pointing((SkyAngle::Arcminute(6.), SkyAngle::Degree(az as f32)))
             .pupil_mode(pupil_mode.clone())
             .zernike()?;
         // let zernp = gs.zernike()?;
@@ -127,7 +127,7 @@ fn main() -> color_eyre::Result<()> {
     };
     for az in azimuth {
         let zernp = Field::new(n_radial_order)
-            .pointing(SkyAngle::Arcminute(6.), SkyAngle::Degree(az as f32))
+            .pointing((SkyAngle::Arcminute(6.), SkyAngle::Degree(az as f32)))
             .pupil_mode(pupil_mode.clone())
             .zernike()?;
         // let zernp = gs.zernike()?;

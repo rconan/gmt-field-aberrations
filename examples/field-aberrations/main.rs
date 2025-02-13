@@ -7,7 +7,7 @@ fn main() -> color_eyre::Result<()> {
     let aberrations = (-20..21)
         .map(|i| {
             let zenith = skyangle::SkyAngle::Arcminute(0.5 * i as f32);
-            let field = Field::new(5).pointing(zenith, azimuth);
+            let field = Field::new(5).pointing((zenith, azimuth));
             field
                 .zernike()
                 .map(|f| (zenith.into_value(), f.coefficients().to_vec()))

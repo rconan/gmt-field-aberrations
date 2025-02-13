@@ -19,7 +19,7 @@ impl Probes {
             .into_par_iter()
             .map(|(zenith, azimuth)| {
                 let field = Field::new(n_radial_order)
-                    .pointing(zenith, azimuth)
+                    .pointing((zenith, azimuth))
                     .pupil_mode(pupil_mode.clone());
                 let zernp = field.zernike().unwrap();
                 // let q = zernp.map(|zernp| (field, zernp));

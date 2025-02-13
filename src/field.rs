@@ -18,13 +18,35 @@ pub enum FieldError {
 }
 type Result<T> = std::result::Result<T, FieldError>;
 
-/// Field location
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Field {
+/// Field position \[zenith,azimuth\]
+#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+pub struct Pointing {
     /// zenith angle
     pub zenith: SkyAngle<f32>,
     /// azimuth angle
     pub azimuth: SkyAngle<f32>,
+}
+impl Pointing {
+    /// Creates an on-axis [Pointing] instance
+    pub fn on_axis() -> Self {
+        Default::default()
+    }
+    /// Creates a [Pointing] instance
+    pub fn new(zenith: SkyAngle<f32>, azimuth: SkyAngle<f32>) -> Self {
+        Self { zenith, azimuth }
+    }
+}
+impl From<(SkyAngle<f32>, SkyAngle<f32>)> for Pointing {
+    fn from((zenith, azimuth): (SkyAngle<f32>, SkyAngle<f32>)) -> Self {
+        Self { zenith, azimuth }
+    }
+}
+
+/// Field location
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Field {
+    /// pointing angle
+    pub pointing: Pointing,
     /// Zernike basis number of radial order
     pub n_radial_order: u32,
     /// exit pupil definition
@@ -35,8 +57,7 @@ pub struct Field {
 impl Default for Field {
     fn default() -> Self {
         Field {
-            zenith: Default::default(),
-            azimuth: Default::default(),
+            pointing: Default::default(),
             n_radial_order: 5,
             pupil_mode: Default::default(),
             coefs_format: Default::default(),
@@ -52,10 +73,9 @@ impl Field {
         }
     }
     /// Sets the GMT pointing direction
-    pub fn pointing(self, zenith: SkyAngle<f32>, azimuth: SkyAngle<f32>) -> Self {
+    pub fn pointing(self, pointing: impl Into<Pointing>) -> Self {
         Self {
-            zenith,
-            azimuth,
+            pointing: pointing.into(),
             ..self
         }
     }
@@ -65,8 +85,8 @@ impl Field {
     }
     /// Returns the [Projections] of the exit pupil wavefront onto the Zernike basis
     pub fn zernike(&self) -> Result<Projection> {
-        let z = self.zenith.to_radians();
-        let a = self.azimuth.to_radians();
+        let z = self.pointing.zenith.to_radians();
+        let a = self.pointing.azimuth.to_radians();
         Ok(match &self.pupil_mode {
             PupilMode::Full => self.mirror(z, a)?,
             PupilMode::Segment {
