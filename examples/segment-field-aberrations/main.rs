@@ -5,7 +5,7 @@ use gmt_field_aberrations::{
         rbm::Rbm,
         units::{Rxyz, Txyz},
     },
-    Mirror, Probes, PupilMode,
+    Mirror, Pointing, Probes, PupilMode,
 };
 use skyangle::SkyAngle;
 use triangle_rs::Builder;
@@ -44,7 +44,7 @@ fn main() -> color_eyre::Result<()> {
             let a = y.atan2(x);
             (z, a)
         })
-        .map(|(z, a)| (SkyAngle::Arcminute(z as f32), SkyAngle::Radian(a as f32)))
+        .map(|(z, a)| Pointing::new(SkyAngle::Arcminute(z as f32), SkyAngle::Radian(a as f32)))
         .collect();
     let now = Instant::now();
     let probes = Probes::new(

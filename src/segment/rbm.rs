@@ -58,6 +58,7 @@ impl From<Dof> for Rbm {
         match value {
             Dof::Tx(txyz) => Rbm::t_x(txyz),
             Dof::Ty(txyz) => Rbm::t_y(txyz),
+            Dof::Tz(txzz) => Rbm::t_z(txzz),
             Dof::Rx(sky_angle) => Rbm::r_x(sky_angle),
             Dof::Ry(sky_angle) => Rbm::r_y(sky_angle),
         }

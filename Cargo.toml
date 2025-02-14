@@ -4,14 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-crseo = { version = "2.1.0", path = "/home/ubuntu/projects/crseo" }
+crseo = "2.1.0"
 env_logger = "0.11.6"
 geotrans = "1.0.0"
 log = "0.4.25"
 rson = "0.1.0"
 serde = { version = "1.0.217", features = ["derive", "rc"] }
 serde-pickle = "1.2.0"
-skyangle = { version = "0.3.0", path = "/home/ubuntu/projects/skyangle", features = ["serde"] }
+skyangle = { version = "0.3.0", features = ["serde"] }
 thiserror = "2.0.11"
 zernike = "0.2.1"
 color-eyre = "0.6.3"

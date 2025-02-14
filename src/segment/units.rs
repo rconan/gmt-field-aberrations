@@ -1,3 +1,5 @@
+use std::ops::Neg;
+
 use serde::{Deserialize, Serialize};
 use skyangle::SkyAngle;
 
@@ -30,3 +32,13 @@ impl Txyz {
     }
 }
 pub type Rxyz = SkyAngle<f64>;
+impl Neg for Txyz {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        match self {
+            Txyz::Mu(x) => Txyz::Mu(-x),
+            Txyz::Nm(x) => Txyz::Nm(-x),
+        }
+    }
+}

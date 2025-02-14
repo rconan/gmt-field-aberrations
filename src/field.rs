@@ -19,7 +19,7 @@ pub enum FieldError {
 type Result<T> = std::result::Result<T, FieldError>;
 
 /// Field position \[zenith,azimuth\]
-#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Copy)]
 pub struct Pointing {
     /// zenith angle
     pub zenith: SkyAngle<f32>,
