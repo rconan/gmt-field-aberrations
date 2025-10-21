@@ -3,21 +3,32 @@ name = "gmt-field-aberrations"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
-crseo = "2.1.0"
+[workspace]
+members = ["gmt-full-field-display"]
+
+[workspace.dependencies]
 env_logger = "0.11.6"
+skyangle = { version = "0.3.0", features = ["serde"] }
+color-eyre = "0.6.3"
+triangle-rs = "0.1.2"
+serde-pickle = "1.2.0"
+rayon = "1.10.0"
+
+[dependencies]
+crseo = "2.5.2"
+env_logger.workspace = true
 geotrans = "1.0.0"
 log = "0.4.25"
 rson = "0.1.0"
 serde = { version = "1.0.217", features = ["derive", "rc"] }
-serde-pickle = "1.2.0"
-skyangle = { version = "0.3.0", features = ["serde"] }
+serde-pickle.workspace = true
+skyangle.workspace = true
 thiserror = "2.0.11"
 zernike = "0.2.1"
-color-eyre = "0.6.3"
+color-eyre.workspace = true
 ron = "0.8.1"
-rayon = "1.10.0"
+rayon.workspace = true
 
 [dev-dependencies]
 faer = "0.21.4"
-triangle-rs = "0.1.2"
+triangle-rs.workspace = true

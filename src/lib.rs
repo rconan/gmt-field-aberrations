@@ -10,6 +10,8 @@ pub use field::{Field, FieldError, Pointing};
 pub use mirror::Mirror;
 pub use probe::Probes;
 
+const PUPIL_SAMPLING: usize = 201;
+
 /// GMT pupil either full or restrict to segment
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
 pub enum PupilMode {

@@ -35,6 +35,12 @@ impl Pointing {
     pub fn new(zenith: SkyAngle<f32>, azimuth: SkyAngle<f32>) -> Self {
         Self { zenith, azimuth }
     }
+    /// Return the pointing direction in cartesian coordinates
+    pub fn cartesian(&self) -> (f64, f64) {
+        let (s, c) = (self.azimuth.to_radians() as f64).sin_cos();
+        let z = self.zenith.into_arcmin().into_value() as f64;
+        (z * c, z * s)
+    }
 }
 impl From<(SkyAngle<f32>, SkyAngle<f32>)> for Pointing {
     fn from((zenith, azimuth): (SkyAngle<f32>, SkyAngle<f32>)) -> Self {
@@ -96,6 +102,10 @@ impl Field {
             } => self.segment(*sid, z, a, mirror, *zeroed)?,
         }
         .coefficients_formatting(self.coefs_format.clone()))
+    }
+    /// Field pointing direction
+    pub fn at(&self) -> &Pointing {
+        &self.pointing
     }
 }
 impl Display for Field {

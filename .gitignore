@@ -2,3 +2,5 @@
 *.pkl
 *.ron
 *.png
+.ipynb_checkpoints/
+.virtual_documents

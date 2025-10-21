@@ -26,4 +26,10 @@ impl Probes {
             projections,
         }
     }
+    pub fn get(&self, i: usize) -> Option<(&Field, &Projection)> {
+        self.fields.get(i).zip(self.projections.get(i))
+    }
+    pub fn len(&self) -> usize {
+        self.fields.len()
+    }
 }

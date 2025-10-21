@@ -3,7 +3,7 @@ use crseo::{gmt, utilities::MaskFilter, Builder, FromBuilder, Source};
 use crate::{
     field::FieldError,
     zernike::{Projection, ZernikeBasis},
-    Field,
+    Field, PUPIL_SAMPLING,
 };
 
 type Result<T> = std::result::Result<T, FieldError>;
@@ -12,7 +12,10 @@ impl Field {
     pub fn mirror(&self, z: f32, a: f32) -> Result<Projection> {
         let mut gmt = gmt!();
         // let mut src = source!();
-        let mut src = Source::builder().zenith_azimuth(vec![z], vec![a]).build()?;
+        let mut src = Source::builder()
+            .pupil_sampling(PUPIL_SAMPLING)
+            .zenith_azimuth(vec![z], vec![a])
+            .build()?;
         src.through(&mut gmt).xpupil();
         let wfe_rms = src.wfe_rms_10e(-9);
         log::info!("WFE RMS: {:?}nm", wfe_rms);
