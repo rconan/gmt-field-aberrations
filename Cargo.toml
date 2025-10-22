@@ -8,7 +8,7 @@ members = ["gmt-full-field-display"]
 
 [workspace.dependencies]
 env_logger = "0.11.6"
-skyangle = { version = "0.3.0", features = ["serde"] }
+skyangle = { version = "0.4.0", features = ["serde"] }
 color-eyre = "0.6.3"
 triangle-rs = "0.1.2"
 serde-pickle = "1.2.0"

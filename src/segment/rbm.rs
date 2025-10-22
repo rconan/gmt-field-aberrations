@@ -1,4 +1,4 @@
-use std::ops::{Add, Neg, Sub};
+use std::ops::{Add, AddAssign, Neg, Sub};
 
 use serde::{Deserialize, Serialize};
 use skyangle::Conversion;
@@ -89,6 +89,17 @@ impl Add for Rbm {
             t_xyz: ta.try_into().unwrap(),
             r_xyz: ra.try_into().unwrap(),
         }
+    }
+}
+impl AddAssign for Rbm {
+    fn add_assign(&mut self, rhs: Self) {
+        let Rbm { t_xyz: t, r_xyz: r } = self;
+        let Rbm {
+            t_xyz: tt,
+            r_xyz: rr,
+        } = rhs;
+        t.iter_mut().zip(tt.into_iter()).for_each(|(x, y)| *x += y);
+        r.iter_mut().zip(rr.into_iter()).for_each(|(x, y)| *x += y);
     }
 }
 impl Sub for Rbm {

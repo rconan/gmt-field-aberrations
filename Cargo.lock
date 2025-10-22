@@ -917,7 +917,7 @@ dependencies = [
  "rson",
  "serde",
  "serde-pickle 1.2.0",
- "skyangle 0.3.1",
+ "skyangle 0.4.0",
  "thiserror 2.0.11",
  "triangle-rs",
  "zernike",
@@ -935,7 +935,7 @@ dependencies = [
  "image",
  "rayon",
  "serde-pickle 1.2.0",
- "skyangle 0.3.1",
+ "skyangle 0.4.0",
  "triangle-rs",
 ]
 
@@ -1927,9 +1927,9 @@ dependencies = [
 
 [[package]]
 name = "skyangle"
-version = "0.3.1"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df90b01ce79c04c9ae50c66e8e4a9c58cff4c863fbef8fe7b7d3584ce8ede157"
+checksum = "4d312a9d152bbc78467e720c84d2cb7d880614504f3524020e7add2eccdc139c"
 dependencies = [
  "serde",
 ]

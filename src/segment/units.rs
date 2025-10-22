@@ -1,4 +1,4 @@
-use std::ops::Neg;
+use std::ops::{AddAssign, Neg};
 
 use serde::{Deserialize, Serialize};
 use skyangle::SkyAngle;
@@ -30,6 +30,12 @@ impl Txyz {
     pub fn to_mu(v: f64) -> Txyz {
         Txyz::Mu(1e6 * v)
     }
+    pub fn into_value(self) -> f64 {
+        match self {
+            Txyz::Mu(v) => v,
+            Txyz::Nm(v) => v,
+        }
+    }
 }
 pub type Rxyz = SkyAngle<f64>;
 impl Neg for Txyz {
@@ -39,6 +45,14 @@ impl Neg for Txyz {
         match self {
             Txyz::Mu(x) => Txyz::Mu(-x),
             Txyz::Nm(x) => Txyz::Nm(-x),
+        }
+    }
+}
+impl AddAssign for Txyz {
+    fn add_assign(&mut self, rhs: Self) {
+        match self {
+            Txyz::Mu(v) => *v += rhs.into_value(),
+            Txyz::Nm(v) => *v += rhs.into_value(),
         }
     }
 }

@@ -3,13 +3,20 @@ use std::{fs::File, io::BufWriter, path::Path, time::Instant};
 use clap::{Parser, Subcommand};
 use gmt_field_aberrations::{
     Mirror, Pointing, Probes, PupilMode,
-    segment::{dof::Dof, units::Txyz},
+    segment::{
+        dof::Dof,
+        rbm::Rbm,
+        units::{Rxyz, Txyz},
+    },
 };
 use skyangle::SkyAngle;
 use triangle_rs::Builder;
 
 #[derive(Parser)]
 pub struct Cli {
+    /// thread pool size
+    #[arg(long, default_value_t = 10usize)]
+    n_thread: usize,
     #[command(subcommand)]
     pupil: Pupil,
 }
@@ -24,6 +31,24 @@ pub enum Pupil {
         /// segment ID
         #[arg(long)]
         id: i32,
+        /// translation along X [micron]
+        #[arg(long)]
+        tx: Option<f64>,
+        /// translation along Y [micron]
+        #[arg(long)]
+        ty: Option<f64>,
+        /// translation along Z [micron]
+        #[arg(long)]
+        tz: Option<f64>,
+        /// rotation along X [arcsec]
+        #[arg(long)]
+        rx: Option<f64>,
+        /// rotation along Y [arcsec]
+        #[arg(long)]
+        ry: Option<f64>,
+        // /// rotation along Z [arcsec]
+        // #[arg(long)]
+        // rz: Option<f64>,
     },
 }
 
@@ -33,7 +58,7 @@ fn main() -> color_eyre::Result<()> {
     let cli = Cli::parse();
 
     rayon::ThreadPoolBuilder::new()
-        .num_threads(10)
+        .num_threads(cli.n_thread)
         .build_global()
         .unwrap();
 
@@ -74,8 +99,35 @@ fn main() -> color_eyre::Result<()> {
     let pupil_mode = match cli.pupil {
         Pupil::Full => todo!(),
         Pupil::Segments => todo!(),
-        Pupil::Segment { id } => {
-            PupilMode::segment(id, Mirror::m2(Dof::Tx(Txyz::Mu(1e2)))).non_zeroed()
+        Pupil::Segment {
+            id,
+            tx,
+            ty,
+            tz,
+            rx,
+            ry,
+            // rz,
+        } => {
+            let mut rbm: Rbm = Default::default();
+            if let Some(v) = tx {
+                rbm += Rbm::from(Dof::Tx(Txyz::Mu(v)));
+            }
+            if let Some(v) = ty {
+                rbm += Rbm::from(Dof::Ty(Txyz::Mu(v)));
+            }
+            if let Some(v) = tz {
+                rbm += Rbm::from(Dof::Tz(Txyz::Mu(v)));
+            }
+            if let Some(v) = rx {
+                rbm += Rbm::from(Dof::Rx(Rxyz::Arcsecond(v)));
+            }
+            if let Some(v) = ry {
+                rbm += Rbm::from(Dof::Ry(Rxyz::Arcsecond(v)));
+            }
+            // if let Some(v) = rz {
+            //     rbm += Rbm::from(Dof::Rz(Rxyz::Arcsecond(v)));
+            // }
+            PupilMode::segment(id, Mirror::m2(dbg!(rbm))).non_zeroed()
         }
     };
     let now = Instant::now();
