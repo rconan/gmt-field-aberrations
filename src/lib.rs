@@ -15,8 +15,10 @@ const PUPIL_SAMPLING: usize = 201;
 /// GMT pupil either full or restrict to segment
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
 pub enum PupilMode {
+    /// Full pupil
     #[default]
     Full,
+    // Pupil restricted to a segment
     Segment {
         /// segment id \[1,7\]
         sid: i32,
@@ -49,7 +51,17 @@ impl PupilMode {
             zeroed: true,
         }
     }
+    pub fn non_zeroed(mut self) -> Self {
+        match &mut self {
+            Self::Segment { zeroed, .. } => {
+                *zeroed = false;
+            }
+            _ => (),
+        }
+        self
+    }
 }
+
 /// Zernike coefficients formatting
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CoefsFormat {

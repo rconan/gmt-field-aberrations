@@ -55,5 +55,36 @@ ax.set_title("Z8")
 
 probes["fields"][0]["pupil_mode"]
 
+fig, axs = plt.subplots(ncols=2, nrows=2, sharex=True, sharey=True, figsize=(12, 10))
+ax = axs[0, 0]
+h = ax.tricontour(triang, z5, cmap="Spectral")
+ax.set_aspect("equal")
+ax.grid()
+fig.colorbar(h, ax=ax)
+ax.set_title("Z5")
+ax = axs[0, 1]
+h = ax.tricontour(triang, z6, cmap="Spectral")
+ax.set_aspect("equal")
+ax.grid()
+fig.colorbar(h, ax=ax)
+ax.set_title("Z6")
+ax = axs[1, 0]
+h = ax.tricontour(triang, z7, cmap="Spectral")
+ax.set_aspect("equal")
+ax.grid()
+fig.colorbar(h, ax=ax)
+ax.set_title("Z7")
+ax = axs[1, 1]
+h = ax.tricontour(triang, z8, cmap="Spectral")
+ax.set_aspect("equal")
+ax.grid()
+fig.colorbar(h, ax=ax)
+ax.set_title("Z8")
 
-# In[ ]:
+coefs = np.asarray([x["coefficients"] for x in probes["projections"]])
+wfe = np.sqrt(np.sum(coefs[:, 3:] ** 2, 1))
+fig, ax = plt.subplots()
+h = ax.tripcolor(triang, wfe, shading="gouraud", cmap="Spectral")
+ax.set_aspect("equal")
+ax.grid()
+fig.colorbar(h, ax=ax)
