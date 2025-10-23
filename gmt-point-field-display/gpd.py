@@ -1,31 +1,31 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.tri as tri
 
 home = os.environ["HOME"]
-root = home + "/mnt/gmt-point-field-display/M2S1_tx/"
+root = home + "/mnt/gmt-point-field-display/"
 
-for i, tx in enumerate(range(-100, 101, 20)):
+filename = "gmt-point-field-display_M2S1_z3z6z9.pkl"
+print(filename)
+probes = np.load(root + filename, allow_pickle=True)
 
-    filename = "gmt-point_field-display.pkl"
-    print(filename)
-    probes = np.load(root + filename, allow_pickle=True)
+a5 = np.array(
+    [
+        [x["coefficients"][4] for x in w]
+        for w in [x for x in [y["projections"] for y in probes]]
+    ]
+)
+a6 = np.array(
+    [
+        [x["coefficients"][5] for x in w]
+        for w in [x for x in [y["projections"] for y in probes]]
+    ]
+)
 
-    z = np.asarray([x["pointing"]["zenith"]["Arcminute"] for x in probes["fields"]])
-    a = np.asarray([x["pointing"]["azimuth"]["Radian"] for x in probes["fields"]])
-    x = z * np.cos(a)
-    y = z * np.sin(a)
-    triang = tri.Triangulation(x, y)
-
-    z5 = np.asarray([x["coefficients"][4] for x in probes["projections"]])
-    z6 = np.asarray([x["coefficients"][5] for x in probes["projections"]])
-    z56 = np.hypot(z5, z6)
-
-    fig, ax = plt.subplots()
-    h = ax.tripcolor(triang, z56, shading="gouraud", cmap="Spectral")
-    ax.set_aspect("equal")
-    ax.grid()
-    ax.set_title(f"M2 S1 - Tx={tx}micron")
-    fig.savefig(root + f"gffd{i:02d}.png", bbox_inches="tight")
-    plt.close(fig)
+r = np.arange(-100, 101, 20)
+fig, ax = plt.subplots()
+ax.plot(r, a5)
+ax.legend(range(1, 4))
+ax.set_prop_cycle(None)
+ax.plot(r, a6, "--")
+ax.grid()
