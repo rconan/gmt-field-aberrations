@@ -3,12 +3,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 
+ID = 7
+
 home = os.environ["HOME"]
-root = home + "/mnt/gmt-full-field-display/M2S1_tx/"
+root = home + f"/mnt/gmt-full-field-display/M2S{ID}_tx/"
 
 for i, tx in enumerate(range(-100, 101, 20)):
-
-    filename = f"M2S1_tx{tx}.pkl"
+    filename = f"M2S{ID}_tx{tx}.pkl"
     print(filename)
     probes = np.load(root + filename, allow_pickle=True)
 
@@ -26,6 +27,6 @@ for i, tx in enumerate(range(-100, 101, 20)):
     h = ax.tripcolor(triang, z56, shading="gouraud", cmap="Spectral")
     ax.set_aspect("equal")
     ax.grid()
-    ax.set_title(f"M2 S1 - Tx={tx}micron")
+    ax.set_title(f"M2 S{ID} - Tx={tx}micron")
     fig.savefig(root + f"gffd{i:02d}.png", bbox_inches="tight")
     plt.close(fig)

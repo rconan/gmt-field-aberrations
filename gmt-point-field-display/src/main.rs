@@ -15,7 +15,7 @@ use skyangle::SkyAngle;
 pub struct Cli {
     /// zenith angle `[arcmin]`
     #[arg(short, long)]
-    zenith: f64,
+    zenith: Vec<f64>,
     /// file name to save data to
     #[arg(short, long)]
     file: Option<String>,
@@ -59,17 +59,18 @@ fn main() -> color_eyre::Result<()> {
 
     let cli = Cli::parse();
 
+    let mut zenith = cli.zenith.into_iter().map(|x| x as f32).cycle();
     let field_angles = vec![
         Pointing::new(
-            SkyAngle::Arcminute(cli.zenith as f32),
+            SkyAngle::Arcminute(zenith.next().unwrap()),
             SkyAngle::Degree(0f32),
         ),
         Pointing::new(
-            SkyAngle::Arcminute(cli.zenith as f32),
+            SkyAngle::Arcminute(zenith.next().unwrap()),
             SkyAngle::Degree(120f32),
         ),
         Pointing::new(
-            SkyAngle::Arcminute(cli.zenith as f32),
+            SkyAngle::Arcminute(zenith.next().unwrap()),
             SkyAngle::Degree(240f32),
         ),
     ];
