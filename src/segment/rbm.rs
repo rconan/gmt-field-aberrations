@@ -1,4 +1,7 @@
-use std::ops::{Add, AddAssign, Neg, Sub};
+use std::{
+    fmt::Display,
+    ops::{Add, AddAssign, Neg, Sub},
+};
 
 use serde::{Deserialize, Serialize};
 use skyangle::Conversion;
@@ -51,6 +54,31 @@ impl Rbm {
             t_xyz: [Default::default(); 3],
             r_xyz: [v0, v, v0],
         }
+    }
+}
+impl Display for Rbm {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let ts = self
+            .t_xyz
+            .iter()
+            .zip(["x", "y", "z"])
+            .filter_map(|(v, a)| (v.as_f64() != 0f64).then_some(a))
+            .rev()
+            .chain(Some("T"))
+            .rev()
+            .collect::<Vec<_>>()
+            .join("");
+        let rs = self
+            .r_xyz
+            .iter()
+            .zip(["x", "y", "z"])
+            .filter_map(|(v, a)| (v.into_value() != 0f64).then_some(a))
+            .rev()
+            .chain(Some("R"))
+            .rev()
+            .collect::<Vec<_>>()
+            .join("");
+        write!(f, "{ts}{rs}")
     }
 }
 impl From<Dof> for Rbm {

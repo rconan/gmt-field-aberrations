@@ -17,6 +17,9 @@ pub struct Cli {
     /// thread pool size
     #[arg(long, default_value_t = 10usize)]
     n_thread: usize,
+    /// file name to save data to
+    #[arg(short, long)]
+    file: Option<String>,
     #[command(subcommand)]
     pupil: Pupil,
 }
@@ -96,7 +99,7 @@ fn main() -> color_eyre::Result<()> {
         .map(|(z, a)| Pointing::new(SkyAngle::Arcminute(z as f32), SkyAngle::Radian(a as f32)))
         .collect();
 
-    let pupil_mode = match cli.pupil {
+    let (filename, pupil_mode) = match cli.pupil {
         Pupil::Full => todo!(),
         Pupil::Segments => todo!(),
         Pupil::Segment {
@@ -127,14 +130,18 @@ fn main() -> color_eyre::Result<()> {
             // if let Some(v) = rz {
             //     rbm += Rbm::from(Dof::Rz(Rxyz::Arcsecond(v)));
             // }
-            PupilMode::segment(id, Mirror::m2(dbg!(rbm))).non_zeroed()
+            (
+                format!("gmt-full-field_M2S{id}_{}.pkl", rbm),
+                PupilMode::segment(id, Mirror::m2(rbm)).non_zeroed(),
+            )
         }
     };
     let now = Instant::now();
     let probes = Probes::new(field_angles, 4, pupil_mode);
     println!("probed field in {:#?}", now.elapsed());
 
-    let file = File::create(Path::new(env!("CARGO_MANIFEST_DIR")).join("gmt-full-field.pkl"))?;
+    let file =
+        File::create(Path::new(env!("CARGO_MANIFEST_DIR")).join(cli.file.unwrap_or(filename)))?;
     let mut buffer = BufWriter::new(file);
     serde_pickle::to_writer(&mut buffer, &probes, Default::default())?;
     Ok(())
