@@ -940,6 +940,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "gmt-point-field-display"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "color-eyre",
+ "env_logger",
+ "gmt-field-aberrations",
+ "serde-pickle 1.2.0",
+ "skyangle 0.4.0",
+]
+
+[[package]]
 name = "half"
 version = "2.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
