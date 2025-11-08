@@ -4,3 +4,4 @@
 *.png
 .ipynb_checkpoints/
 .virtual_documents
+/report
