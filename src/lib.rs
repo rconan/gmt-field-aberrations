@@ -78,3 +78,23 @@ impl Default for CoefsFormat {
         }
     }
 }
+
+#[cfg(test)]
+pub mod tests {
+    use crate::zernike::OpdToZernike;
+
+    use super::*;
+
+    #[test]
+    fn field() {
+        let zenith = skyangle::SkyAngle::Arcminute(0f32);
+        let azimuth = skyangle::SkyAngle::Degree(0.);
+        let field = Field::new(1)
+            .pointing((zenith, azimuth))
+            .pupil_mode(
+                PupilMode::m2(1).non_zeroed()
+            );
+        let proj = field.zernike(OpdToZernike::LeastSquareFit).unwrap();
+        dbg!(proj.coefficients());
+    }
+}

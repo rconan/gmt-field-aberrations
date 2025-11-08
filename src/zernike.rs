@@ -115,3 +115,50 @@ impl ZernikeBasisBuilder {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::iter;
+
+    use super::*;
+
+    #[test]
+    fn zernike() {
+        let n = 64;
+        let mut xy = vec![];
+        for i in 0..n {
+            let x = 2f64 * i as f64 / (n - 1) as f64 - 1f64;
+            for j in 0..n {
+                let y = 2f64 * j as f64 / (n - 1) as f64 - 1f64;
+                let r = x.hypot(y);
+                if r <= 1f64 {
+                    xy.push([x, y]);
+                }
+            }
+        }
+        let zern = ZernikeBasis::builder(1, &xy).build();
+        dbg!(&zern.modes[..5]);
+    }
+    #[test]
+    fn project() {
+        let n = 64;
+        let mut xy = vec![];
+        for i in 0..n {
+            let x = 2f64 * i as f64 / (n - 1) as f64 - 1f64;
+            for j in 0..n {
+                let y = 2f64 * j as f64 / (n - 1) as f64 - 1f64;
+                let r = x.hypot(y);
+                if r <= 1f64 {
+                    xy.push([x, y]);
+                }
+            }
+        }
+        let zern = ZernikeBasis::builder(1, &xy).build();
+        dbg!(&zern.modes[..5]);
+
+        let mut projection = Projection::new(zern);
+        let opd: Vec<_> = iter::repeat(1e-9f32).take(xy.len()).collect::<Vec<_>>();
+        projection.least_square_fit(opd).unwrap();
+        dbg!(projection.coefficients());
+    }
+}

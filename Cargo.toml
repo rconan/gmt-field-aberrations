@@ -18,7 +18,6 @@ clap = { version = "4.5.50", features = ["derive"] }
 [dependencies]
 crseo = "2.5.2"
 env_logger.workspace = true
-geotrans = "1.0.0"
 log = "0.4.25"
 rson = "0.1.0"
 serde = { version = "1.0.217", features = ["derive", "rc"] }
@@ -31,9 +30,10 @@ ron = "0.8.1"
 rayon.workspace = true
 anyhow = "1.0.100"
 faer = "0.23.2"
+geotrans = "1.1.0"
 
 [dev-dependencies]
 triangle-rs.workspace = true
- 
 [patch.crates-io]
 zernike ={path="/home/rconan/projects/zernike"}
+geotrans = {path="/home/rconan/projects/geotrans"}

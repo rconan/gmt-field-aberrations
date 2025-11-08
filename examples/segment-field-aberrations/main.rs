@@ -25,7 +25,7 @@ fn main() -> color_eyre::Result<()> {
         .collect();
     let tri = {
         let mut builder = Builder::new();
-        builder.add_polygon(&nodes).set_switches("QDqa0.25");
+        builder.add_polygon(&nodes).set_switches("QDqa0.5");
         builder.build()
     };
     println!(
@@ -52,12 +52,13 @@ fn main() -> color_eyre::Result<()> {
         4,
         PupilMode::segment(
             1,
-            Mirror::M2(Rbm::t_y(Txyz::Mu(20.)) + Rbm::r_x(Rxyz::Arcsecond(1.))),
-            // Mirror::Both(
-            //     Rbm::r_x(Rxyz::Arcsecond(1.)),
-            //     Rbm::r_x(Rxyz::Arcsecond(-8.)),
-            // ),
-        ),
+            Mirror::M2(Default::default()), // Mirror::M2(Rbm::t_y(Txyz::Mu(20.)) + Rbm::r_x(Rxyz::Arcsecond(1.))),
+                                            // Mirror::Both(
+                                            //     Rbm::r_x(Rxyz::Arcsecond(1.)),
+                                            //     Rbm::r_x(Rxyz::Arcsecond(-8.)),
+                                            // ),
+        )
+        .non_zeroed(),
     );
     println!("probed field in {:#?}", now.elapsed());
 

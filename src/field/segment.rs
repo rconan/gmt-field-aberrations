@@ -134,7 +134,7 @@ impl Field {
                 }
                 OpdToZernike::LeastSquareFit => {
                     let zern = ZernikeBasis::builder(self.n_radial_order, &xy)
-                        .gramschmidt(true)
+                        .gramschmidt(false)
                         .build();
                     let mut zernp = Projection::new(zern);
                     zernp

@@ -1,6 +1,6 @@
-use std::{fs::File, io::BufWriter, path::Path, time::Instant};
+use std::{fmt::Display, fs::File, io::BufWriter, path::Path, time::Instant};
 
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
 use gmt_field_aberrations::{
     Mirror, Pointing, Probes, PupilMode,
     segment::{
@@ -9,7 +9,7 @@ use gmt_field_aberrations::{
         units::{Rxyz, Txyz},
     },
 };
-use skyangle::SkyAngle;
+use skyangle::{Conversion, SkyAngle};
 use triangle_rs::Builder;
 
 #[derive(Parser)]
@@ -49,10 +49,26 @@ pub enum Pupil {
         /// rotation along Y [arcsec]
         #[arg(long)]
         ry: Option<f64>,
-        // /// rotation along Z [arcsec]
-        // #[arg(long)]
-        // rz: Option<f64>,
+        /// reference frame
+        #[arg(long,default_value_t=ReferenceFrame::Local)]
+        frame: ReferenceFrame, // /// rotation along Z [arcsec]
+                               // #[arg(long)]
+                               // rz: Option<f64>,
     },
+}
+
+#[derive(Clone, ValueEnum)]
+pub enum ReferenceFrame {
+    Local,
+    Global,
+}
+impl Display for ReferenceFrame {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ReferenceFrame::Local => write!(f, "local"),
+            ReferenceFrame::Global => write!(f, "global"),
+        }
+    }
 }
 
 fn main() -> color_eyre::Result<()> {
@@ -77,7 +93,7 @@ fn main() -> color_eyre::Result<()> {
         .collect();
     let tri = {
         let mut builder = Builder::new();
-        builder.add_polygon(&nodes).set_switches("QDqa1.0");
+        builder.add_polygon(&nodes).set_switches("QDqa0.5");
         builder.build()
     };
     println!(
@@ -109,6 +125,7 @@ fn main() -> color_eyre::Result<()> {
             tz,
             rx,
             ry,
+            frame,
             // rz,
         } => {
             let mut rbm: Rbm = Default::default();
@@ -126,6 +143,15 @@ fn main() -> color_eyre::Result<()> {
             }
             if let Some(v) = ry {
                 rbm += Rbm::from(Dof::Ry(Rxyz::Arcsecond(v)));
+            }
+            dbg!(&rbm);
+            if let ReferenceFrame::Global = frame {
+                let grx = rx.unwrap_or_default().from_arcsec();
+                let gry = ry.unwrap_or_default().from_arcsec();
+                let rbms = geotrans::Mirror::<geotrans::M2>::tiptilt_2_rigidbodymotions((grx, gry));
+                let lrbm = rbms.chunks(6).nth(id as usize - 1).unwrap();
+                rbm = Rbm::from(lrbm);
+                dbg!(&rbm);
             }
             // if let Some(v) = rz {
             //     rbm += Rbm::from(Dof::Rz(Rxyz::Arcsecond(v)));
