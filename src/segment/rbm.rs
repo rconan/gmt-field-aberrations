@@ -92,6 +92,15 @@ impl From<Dof> for Rbm {
         }
     }
 }
+impl From<&[f64]> for Rbm {
+    fn from(v: &[f64]) -> Self {
+        assert_eq!(v.len(), 6);
+        Self {
+            t_xyz: [Txyz::M(v[0]), Txyz::M(v[1]), Txyz::M(v[2])],
+            r_xyz: [Rxyz::Radian(v[3]), Rxyz::Radian(v[4]), Rxyz::Radian(v[5])],
+        }
+    }
+}
 impl Add for Rbm {
     type Output = Rbm;
 
