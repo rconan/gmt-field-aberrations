@@ -4,7 +4,7 @@ mod field;
 mod mirror;
 mod probe;
 pub mod segment;
-mod zernike;
+pub mod zernike;
 
 pub use field::{Field, FieldError, Pointing};
 pub use mirror::Mirror;
