@@ -19,7 +19,8 @@ fn main() -> color_eyre::Result<()> {
     let field: Field = ron::de::from_reader(&file)?;
     println!("{:-<100}", "");
     println!("{field}");
-    let zernp = field.zernike()?;
+    let zernp = field.zernike(gmt_field_aberrations::zernike::OpdToZernike::Projection)?;
+
     println!("{zernp}");
     Ok(())
 }

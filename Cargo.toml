@@ -25,12 +25,15 @@ serde = { version = "1.0.217", features = ["derive", "rc"] }
 serde-pickle.workspace = true
 skyangle.workspace = true
 thiserror = "2.0.11"
-zernike = "0.2.1"
+zernike = "0.2.2"
 color-eyre.workspace = true
 ron = "0.8.1"
 rayon.workspace = true
 anyhow = "1.0.100"
+faer = "0.23.2"
 
 [dev-dependencies]
-faer = "0.21.4"
 triangle-rs.workspace = true
+ 
+[patch.crates-io]
+zernike ={path="/home/rconan/projects/zernike"}

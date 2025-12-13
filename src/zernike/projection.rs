@@ -1,10 +1,17 @@
 use std::{fmt::Display, sync::Arc};
 
+use faer::linalg::svd::SvdError;
 use serde::{Deserialize, Serialize};
 
 use crate::CoefsFormat;
 
 use super::ZernikeBasis;
+
+#[derive(Debug, Clone)]
+pub enum OpdToZernike {
+    Projection,
+    LeastSquareFit,
+}
 
 /// Projection onto a Zernike basis
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -47,6 +54,18 @@ impl Projection {
             .map(|x| x / (n as f64).sqrt())
             .collect();
         self
+    }
+    pub fn least_square_fit(&mut self, opd: impl Into<Arc<[f32]>>) -> Result<&mut Self, SvdError> {
+        self.opd = opd.into();
+        let n = self.opd.len();
+        assert_eq!(n, self.basis.modes.len() / self.basis.n_mode);
+        let mut iter = self.opd.iter().map(|&x| 1e9 * x as f64);
+        let opd = faer::Mat::from_fn(n, 1, |_, _| iter.next().unwrap());
+        let svd = self.basis.mat().svd()?;
+        let c = svd.pseudoinverse() * opd;
+        self.coefficients = c.col_as_slice(0).to_vec();
+
+        Ok(self)
     }
     /// Returns the Zernike projections coefficients
     pub fn coefficients(&self) -> &[f64] {

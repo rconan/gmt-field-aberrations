@@ -1,10 +1,14 @@
 use std::fmt::Display;
 
 use crseo::CrseoError;
+use faer::linalg::svd::SvdError;
 use serde::{Deserialize, Serialize};
 use skyangle::SkyAngle;
 
-use crate::{zernike::Projection, CoefsFormat, PupilMode};
+use crate::{
+    zernike::{OpdToZernike, Projection},
+    CoefsFormat, PupilMode,
+};
 
 mod mirror;
 mod segment;
@@ -15,6 +19,8 @@ pub enum FieldError {
     Crseo(#[from] CrseoError),
     #[error("failed to create a segment")]
     Segment(#[from] geotrans::Error),
+    #[error("least square to Zernike failed {0:?}")]
+    LeastSquareFit(SvdError),
 }
 type Result<T> = std::result::Result<T, FieldError>;
 
@@ -90,7 +96,7 @@ impl Field {
         Self { pupil_mode, ..self }
     }
     /// Returns the [Projections] of the exit pupil wavefront onto the Zernike basis
-    pub fn zernike(&self) -> Result<Projection> {
+    pub fn zernike(&self, opd_to_zern: OpdToZernike) -> Result<Projection> {
         let z = self.pointing.zenith.to_radians();
         let a = self.pointing.azimuth.to_radians();
         Ok(match &self.pupil_mode {
@@ -99,7 +105,7 @@ impl Field {
                 sid,
                 mirror,
                 zeroed,
-            } => self.segment(*sid, z, a, mirror, *zeroed)?,
+            } => self.segment(*sid, z, a, mirror, *zeroed, opd_to_zern)?,
         }
         .coefficients_formatting(self.coefs_format.clone()))
     }

@@ -3,7 +3,7 @@ use geotrans::{Segment, SegmentTrait, Transform, M1};
 
 use crate::{
     field::FieldError,
-    zernike::{Projection, ZernikeBasis},
+    zernike::{OpdToZernike, Projection, ZernikeBasis},
     Field, Mirror,
 };
 
@@ -17,6 +17,7 @@ impl Field {
         a: f32,
         mirror: &Mirror,
         zeroed: bool,
+        opd_to_zern: OpdToZernike,
     ) -> Result<Projection> {
         // segment ID
         // let sid = 1;
@@ -64,7 +65,7 @@ impl Field {
                 .map(|c| [c[0] - xyz_chief[0], c[1] - xyz_chief[1]])
                 .collect();
             log::info!("segment rays #: {}", xy.len());
-            let zern = ZernikeBasis::new(self.n_radial_order, &xy, None);
+            // let zern = ZernikeBasis::new(self.n_radial_order, &xy, None);
 
             // opd wrt to reference
             let opd: Vec<_> = src
@@ -78,10 +79,28 @@ impl Field {
                 .cloned()
                 .collect();
             // projection onto Zernike
-            let mut zernp = Projection::new(zern);
+            // let mut zernp = Projection::new(zern);
 
-            zernp.project(&*opd);
-            zernp
+            match opd_to_zern {
+                OpdToZernike::Projection => {
+                    let zern = ZernikeBasis::builder(self.n_radial_order, &xy)
+                        .gramschmidt(true)
+                        .build();
+                    let mut zernp = Projection::new(zern);
+                    zernp.project(&*opd);
+                    zernp
+                }
+                OpdToZernike::LeastSquareFit => {
+                    let zern = ZernikeBasis::builder(self.n_radial_order, &xy)
+                        .gramschmidt(false)
+                        .build();
+                    let mut zernp = Projection::new(zern);
+                    zernp
+                        .least_square_fit(&*opd)
+                        .map_err(|e| FieldError::LeastSquareFit(e))?;
+                    zernp
+                }
+            }
         } else {
             // probing source (perturbed GMT)
             mirror.apply_rbms(sid, &mut gmt);
@@ -97,15 +116,33 @@ impl Field {
                 .map(|c| [c[0] - xyz_chief[0], c[1] - xyz_chief[1]])
                 .collect();
             log::info!("segment rays #: {}", xy.len());
-            let zern = ZernikeBasis::new(self.n_radial_order, &xy, None);
+            // let zern = ZernikeBasis::new(self.n_radial_order, &xy, None);
 
             // opd wrt to reference
             let opd = src.phase().iter();
             let opd: Vec<_> = src.rays().mask().filter(opd).cloned().collect();
             // projection onto Zernike
-            let mut zernp = Projection::new(zern);
-            zernp.project(&*opd);
-            zernp
+            // let mut zernp = Projection::new(zern);
+            match opd_to_zern {
+                OpdToZernike::Projection => {
+                    let zern = ZernikeBasis::builder(self.n_radial_order, &xy)
+                        .gramschmidt(true)
+                        .build();
+                    let mut zernp = Projection::new(zern);
+                    zernp.project(&*opd);
+                    zernp
+                }
+                OpdToZernike::LeastSquareFit => {
+                    let zern = ZernikeBasis::builder(self.n_radial_order, &xy)
+                        .gramschmidt(true)
+                        .build();
+                    let mut zernp = Projection::new(zern);
+                    zernp
+                        .least_square_fit(&*opd)
+                        .map_err(|e| FieldError::LeastSquareFit(e))?;
+                    zernp
+                }
+            }
         };
         Ok(zernp)
     }

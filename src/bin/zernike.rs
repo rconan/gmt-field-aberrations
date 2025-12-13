@@ -8,10 +8,10 @@ use skyangle::Conversion;
 fn main() -> anyhow::Result<()> {
     env_logger::init();
 
-    let sid = 2;
+    let sid = 7;
     let n_radial_order = 5;
 
-    let za = 10f32;
+    let za = 0f32;
     let aa = 0f32;
 
     let gramschmidt = false;

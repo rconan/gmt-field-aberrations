@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import tri
 
-file = "zernike-modes_5_gs0_s2_z10.0a0.0.pkl"
+file = "zernike-modes_5_gs0_z0.0a0.0.pkl"
 data = np.load(file, allow_pickle=True)
 
 xy = data["xy"]

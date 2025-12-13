@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use zernike::{gram_schmidt, jnm, zernike};
 
 mod projection;
-pub use projection::Projection;
+pub use projection::{OpdToZernike, Projection};
 
 /// Zernike modal basis
 #[derive(Debug, Default, Serialize, Deserialize, PartialEq)]
@@ -60,6 +60,9 @@ impl ZernikeBasis {
             },
             ..Default::default()
         }
+    }
+    pub fn mat(&self) -> faer::MatRef<'_, f64> {
+        faer::MatRef::from_column_major_slice(&self.modes, self.xy.len(), self.n_mode)
     }
 }
 
