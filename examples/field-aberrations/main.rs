@@ -10,7 +10,7 @@ fn main() -> color_eyre::Result<()> {
     for i in 1..=7 {
         let sid = Some(i);
         // let rbm= Some(Rbm::t_x(Txyz::Mu(1f64)));
-        let azimuth = skyangle::SkyAngle::Degree(90.);
+        let azimuth = skyangle::SkyAngle::Degree(0.);
         let aberrations = (-20..21)
             .map(|i| {
                 let zenith = skyangle::SkyAngle::Arcminute(0.5 * i as f32);
@@ -37,7 +37,7 @@ fn main() -> color_eyre::Result<()> {
             .join("field-aberrations")
             .join(sid.map_or_else(
                 || "field-aberrations.pkl".into(),
-                |sid| format!("field-aberrations_s{sid}_90_lsq.pkl"),
+                |sid| format!("field-aberrations_s{sid}_lsq.pkl"),
             ));
         println!("saving field aberrations to {path:?}");
         serde_pickle::to_writer(&mut File::create(path)?, &aberrations, Default::default())?;

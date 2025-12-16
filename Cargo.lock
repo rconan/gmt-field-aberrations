@@ -954,7 +954,9 @@ dependencies = [
 
 [[package]]
 name = "geotrans"
-version = "1.1.0"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4474eb1c84c91204dd1096bcb3f4bac5d5c0873f499bec88adec9b98a2a4fa5f"
 dependencies = [
  "thiserror 1.0.69",
 ]
@@ -2974,6 +2976,8 @@ checksum = "f17a85883d4e6d00e8a97c586de764dabcc06133f7f1d55dce5cdc070ad7fe59"
 [[package]]
 name = "zernike"
 version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0a89417b7f5a63fb5594d229cac4557070637744edb8c1750e1bc45931ea290f"
 dependencies = [
  "rayon",
 ]
@@ -3022,3 +3026,7 @@ checksum = "29ce2c8a9384ad323cf564b67da86e21d3cfdff87908bc1223ed5c99bc792713"
 dependencies = [
  "zune-core",
 ]
+
+[[patch.unused]]
+name = "geotrans"
+version = "2.0.0"

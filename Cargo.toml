@@ -35,5 +35,4 @@ geotrans = "1.1.0"
 [dev-dependencies]
 triangle-rs.workspace = true
 [patch.crates-io]
-zernike ={path="/home/rconan/projects/zernike"}
 geotrans = {path="/home/rconan/projects/geotrans"}
