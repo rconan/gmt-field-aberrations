@@ -163,7 +163,12 @@ fn main() -> color_eyre::Result<()> {
         }
     };
     let now = Instant::now();
-    let probes = Probes::new(field_angles, 4, pupil_mode);
+    let probes = Probes::new(
+        field_angles,
+        4,
+        pupil_mode,
+        gmt_field_aberrations::zernike::OpdToZernike::LeastSquareFit,
+    );
     println!("probed field in {:#?}", now.elapsed());
 
     let file =

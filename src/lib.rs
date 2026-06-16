@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use serde::{Deserialize, Serialize};
 
 mod field;
@@ -62,6 +64,22 @@ impl PupilMode {
     }
 }
 
+impl Display for PupilMode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let msg = match self {
+            PupilMode::Full => "full".to_string(),
+            PupilMode::Segment {
+                sid,
+                mirror,
+                zeroed,
+            } => {
+                format!("s{}{}", sid, if *zeroed { "z" } else { "" })
+            }
+        };
+        write!(f, "{}", msg)
+    }
+}
+
 /// Zernike coefficients formatting
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CoefsFormat {
@@ -91,9 +109,7 @@ pub mod tests {
         let azimuth = skyangle::SkyAngle::Degree(0.);
         let field = Field::new(1)
             .pointing((zenith, azimuth))
-            .pupil_mode(
-                PupilMode::m2(1).non_zeroed()
-            );
+            .pupil_mode(PupilMode::m2(1).non_zeroed());
         let proj = field.zernike(OpdToZernike::LeastSquareFit).unwrap();
         dbg!(proj.coefficients());
     }

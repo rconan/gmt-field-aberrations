@@ -7,32 +7,30 @@ edition = "2021"
 members = ["gmt-full-field-display", "gmt-point-field-display"]
 
 [workspace.dependencies]
-env_logger = "0.11.6"
+env_logger = "0.11.10"
 skyangle = { version = "0.4.0", features = ["serde"] }
-color-eyre = "0.6.3"
+color-eyre = "0.6.5"
 triangle-rs = "0.1.2"
 serde-pickle = "1.2.0"
-rayon = "1.10.0"
-clap = { version = "4.5.50", features = ["derive"] }
+rayon = "1.12.0"
+clap = { version = "4.6.1", features = ["derive"] }
 
 [dependencies]
-crseo = "2.5.2"
+crseo = "2.5.3"
 env_logger.workspace = true
-log = "0.4.25"
+log = "0.4.32"
 rson = "0.1.0"
-serde = { version = "1.0.217", features = ["derive", "rc"] }
+serde = { version = "1.0.228", features = ["derive", "rc"] }
 serde-pickle.workspace = true
 skyangle.workspace = true
-thiserror = "2.0.11"
+thiserror = "2.0.18"
 zernike = "0.2.2"
 color-eyre.workspace = true
-ron = "0.8.1"
+ron = "0.12.1"
 rayon.workspace = true
-anyhow = "1.0.100"
-faer = "0.23.2"
-geotrans = "1.1.0"
+anyhow = "1.0.102"
+faer = "0.24.0"
+geotrans = "1.2.0"
 
 [dev-dependencies]
 triangle-rs.workspace = true
-[patch.crates-io]
-geotrans = {path="/home/rconan/projects/geotrans"}

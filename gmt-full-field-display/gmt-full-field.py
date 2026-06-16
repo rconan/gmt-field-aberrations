@@ -9,7 +9,8 @@ import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 # %matplotlib inline
 
-probes = np.load("gmt-full-field.pkl", allow_pickle=True)
+# probes = np.load("gmt-full-field.pkl", allow_pickle=True)
+probes = np.load("gmt-full-field_M2S1_TRy.pkl", allow_pickle=True)
 
 z = np.asarray([x["pointing"]["zenith"]["Arcminute"] for x in probes["fields"]])
 a = np.asarray([x["pointing"]["azimuth"]["Radian"] for x in probes["fields"]])
