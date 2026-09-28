@@ -1,0 +1,12 @@
+[package]
+name = "delrays"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow.workspace = true
+crseo.workspace = true
+plotters = "0.3.7"
+serde.workspace = true
+serde-pickle.workspace = true
+triangle-rs.workspace = true

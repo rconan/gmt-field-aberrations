@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [workspace]
-members = ["gmt-full-field-display", "gmt-point-field-display"]
+members = ["delrays","gmt-full-field-display", "gmt-point-field-display"]
 
 [workspace.dependencies]
 env_logger = "0.11.10"
@@ -14,13 +14,16 @@ triangle-rs = "0.1.2"
 serde-pickle = "1.2.0"
 rayon = "1.12.0"
 clap = { version = "4.6.1", features = ["derive"] }
+anyhow = "1.0.102"
+crseo = "2.5.3"
+serde = { version = "1.0.229", features = ["derive"] }
 
 [dependencies]
-crseo = "2.5.3"
+crseo.workspace = true
 env_logger.workspace = true
 log = "0.4.32"
 rson = "0.1.0"
-serde = { version = "1.0.228", features = ["derive", "rc"] }
+serde.workspace = true
 serde-pickle.workspace = true
 skyangle.workspace = true
 thiserror = "2.0.18"
@@ -28,7 +31,7 @@ zernike = "0.2.2"
 color-eyre.workspace = true
 ron = "0.12.1"
 rayon.workspace = true
-anyhow = "1.0.102"
+anyhow.workspace = true
 faer = "0.24.0"
 geotrans = "1.2.0"
 
