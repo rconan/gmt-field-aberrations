@@ -2,6 +2,8 @@ use std::fmt::Display;
 
 use serde::{Deserialize, Serialize};
 
+use crate::Set;
+
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct Opd {
     pub(crate) xyz: [f64; 3],
@@ -64,6 +66,41 @@ impl From<&Opds> for Stats {
             min_max: (min, max),
             mean,
             var,
+        }
+    }
+}
+impl From<&Set<Opds>> for Stats {
+    fn from(set: &Set<Opds>) -> Self {
+        let (n_sample, mins, maxs, means, vars) = set.iter().fold(
+            (0usize, vec![], vec![], 0f64, 0f64),
+            |(mut n, mut mins, mut maxs, mut means, mut vars), opds| {
+                let Stats {
+                    n_sample,
+                    min_max: (min, max),
+                    mean,
+                    var,
+                } = opds.into();
+                n += n_sample;
+                mins.push(min);
+                maxs.push(max);
+                means += mean * n_sample as f64;
+                vars += var * n_sample as f64;
+                (n, mins, maxs, means, vars)
+            },
+        );
+        let min = mins
+            .into_iter()
+            .min_by(|a, b| a.partial_cmp(b).unwrap())
+            .unwrap();
+        let max = maxs
+            .into_iter()
+            .max_by(|a, b| a.partial_cmp(b).unwrap())
+            .unwrap();
+        Self {
+            n_sample,
+            min_max: (min, max),
+            mean: means / n_sample as f64,
+            var: vars / n_sample as f64,
         }
     }
 }
