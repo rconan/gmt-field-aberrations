@@ -38,3 +38,6 @@ thiserror.workspace = true
 
 [dev-dependencies]
 triangle-rs.workspace = true
+
+[patch.crates-io]
+crseo = {path="/home/rconan/projects/crseo"}

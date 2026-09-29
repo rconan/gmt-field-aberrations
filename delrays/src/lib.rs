@@ -1,4 +1,6 @@
-use crseo::{Builder, CrseoError, FromBuilder, raytracing::Rays};
+use crseo::{
+    Builder, CrseoError, raytracing::{Rays, RaysBuilder},
+};
 use triangle_rs::Delaunay;
 
 mod delaunay;
@@ -22,7 +24,7 @@ pub trait RayTracing {
 pub trait Trace {
     type From;
     type OpdData;
-    fn from_mesh(mesh: &Self::From) -> Result<Self, CrseoError>
+    fn from_mesh(mesh: &Self::From, builder: RaysBuilder) -> Result<Self, CrseoError>
     where
         Self: Sized;
     fn trace<T: RayTracing>(&mut self, object: &mut T);
@@ -31,8 +33,8 @@ pub trait Trace {
 impl Trace for Rays {
     type From = Delaunay;
     type OpdData = Opds;
-    fn from_mesh(mesh: &Self::From) -> Result<Self, CrseoError> {
-        Rays::builder()
+    fn from_mesh(mesh: &Self::From, builder: RaysBuilder) -> Result<Self, CrseoError> {
+        builder
             .xy(mesh.vertex_iter().flatten().cloned().collect())
             .build()
     }
@@ -54,11 +56,13 @@ impl Trace for Rays {
 impl Trace for Set<Rays> {
     type From = Set<Delaunay>;
     type OpdData = Set<Opds>;
-    fn from_mesh(mesh: &Self::From) -> Result<Self, CrseoError>
+    fn from_mesh(mesh: &Self::From, builder: RaysBuilder) -> Result<Self, CrseoError>
     where
         Self: Sized,
     {
-        mesh.iter().map(|del| Rays::from_mesh(del)).collect()
+        mesh.iter()
+            .map(|del| Rays::from_mesh(del, builder.clone()))
+            .collect()
     }
 
     fn trace<T: RayTracing>(&mut self, object: &mut T) {

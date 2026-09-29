@@ -45,6 +45,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "allocator-api2"
+version = "0.2.21"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "683d7910e743518b0e34f1186f92494becacb047c7b6bf616c96772180fef923"
+
+[[package]]
 name = "android_system_properties"
 version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -633,10 +639,10 @@ checksum = "d0a5c400df2834b80a4c3327b3aad3a4c4cd4de0629063962b03235697506a28"
 [[package]]
 name = "crseo"
 version = "2.5.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e3afceb55b5438d8f6895f02b0d6dacd4eb5523d8958872e1a5c884deda12bf"
 dependencies = [
+ "anyhow",
  "crseo-sys",
+ "crseo_modes-set",
  "indicatif",
  "libm",
  "log",
@@ -654,11 +660,17 @@ dependencies = [
 [[package]]
 name = "crseo-sys"
 version = "1.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f42607a98c44f81ba50c8cae9bfed5fa65773187b23416bf71ee457a6b3b96c1"
 dependencies = [
  "bindgen",
  "cmake",
+]
+
+[[package]]
+name = "crseo_modes-set"
+version = "0.1.0"
+dependencies = [
+ "spade",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -692,6 +704,7 @@ dependencies = [
  "plotters",
  "serde",
  "serde-pickle 1.2.0",
+ "skyangle",
  "thiserror 2.0.21",
  "triangle-rs",
 ]
@@ -982,6 +995,12 @@ name = "foldhash"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
+
+[[package]]
+name = "foldhash"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "77ce24cb58228fbb8aa041425bb1050850ac19177686ea6e0f41a70416f56fdb"
 
 [[package]]
 name = "font-kit"
@@ -1465,7 +1484,18 @@ version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9229cfe53dfd69f0609a49f65461bd93001ea1ef889cd5529dd176593f5338a1"
 dependencies = [
- "foldhash",
+ "foldhash 0.1.5",
+]
+
+[[package]]
+name = "hashbrown"
+version = "0.16.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "841d1cc9bed7f9236f321df977030373f4a4163ae1a7dbfe1a51a2c1a51d9100"
+dependencies = [
+ "allocator-api2",
+ "equivalent",
+ "foldhash 0.2.0",
 ]
 
 [[package]]
@@ -2692,6 +2722,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "47b34b781b31e5d73e9fbc8689c70551fd1ade9a19e3e28cfec8580a79290cc4"
 
 [[package]]
+name = "robust"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4e27ee8bb91ca0adcf0ecb116293afa12d393f9c2b9b9cd54d33e8078fe19839"
+
+[[package]]
 name = "ron"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2938,6 +2974,18 @@ name = "smallvec"
 version = "1.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
+
+[[package]]
+name = "spade"
+version = "2.15.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9699399fd9349b00b184f5635b074f9ec93afffef30c853f8c875b32c0f8c7fa"
+dependencies = [
+ "hashbrown 0.16.1",
+ "num-traits",
+ "robust",
+ "smallvec",
+]
 
 [[package]]
 name = "spindle"
