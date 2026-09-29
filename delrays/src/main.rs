@@ -5,6 +5,7 @@ use delrays::{Gmt, Mesh, Trace};
 use triangle_rs::Delaunay;
 
 fn main() -> anyhow::Result<()> {
+    // segment ID set with environment variable SID (or set to 7 if not present)
     let delaunay = Delaunay::gmt_segment()?;
     delaunay.plot();
     println!("{}", delaunay);

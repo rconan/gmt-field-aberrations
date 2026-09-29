@@ -3,6 +3,8 @@ use std::{env, f64, num::ParseIntError};
 use plotters::prelude::*;
 use triangle_rs::{Builder, Delaunay};
 
+use crate::Set;
+
 #[derive(Debug, thiserror::Error)]
 pub enum MeshError {
     #[error(
@@ -49,6 +51,20 @@ pub trait Mesh {
             [8.71 * c, 8.71 * s]
         });
         Ok(Self::disc(rim_diameter, delta_rim, origin))
+    }
+    fn gmt() -> Set<Delaunay> {
+        let rim_diameter = 8.365;
+        let delta_rim = 1f64 / 4f64;
+        let mut segment = vec![];
+        for id in 1..=7 {
+            let origin = (id < 7).then_some({
+                let o = (3 - 2 * (id - 1)) as f64 * f64::consts::FRAC_PI_6;
+                let (s, c) = o.sin_cos();
+                [8.71 * c, 8.71 * s]
+            });
+            segment.push(Self::disc(rim_diameter, delta_rim, origin));
+        }
+        Set(segment)
     }
     fn plot(&self);
 }
@@ -105,5 +121,83 @@ impl Mesh for Delaunay {
                     ))
                     .unwrap();
             });
+    }
+}
+
+impl Mesh for Set<Delaunay> {
+    fn plot(&self) {
+        let fig = SVGBackend::new("mesh.svg", (768, 768)).into_drawing_area();
+        fig.fill(&WHITE).unwrap();
+
+        let xmin = self
+            .iter()
+            .map(|del| {
+                del.x()
+                    .into_iter()
+                    .min_by(|a, b| a.partial_cmp(b).unwrap())
+                    .unwrap()
+            })
+            .min_by(|a, b| a.partial_cmp(b).unwrap())
+            .unwrap();
+        let xmax = self
+            .iter()
+            .map(|del| {
+                del.x()
+                    .into_iter()
+                    .max_by(|a, b| a.partial_cmp(b).unwrap())
+                    .unwrap()
+            })
+            .max_by(|a, b| a.partial_cmp(b).unwrap())
+            .unwrap();
+        let ymin = self
+            .iter()
+            .map(|del| {
+                del.y()
+                    .into_iter()
+                    .min_by(|a, b| a.partial_cmp(b).unwrap())
+                    .unwrap()
+            })
+            .min_by(|a, b| a.partial_cmp(b).unwrap())
+            .unwrap();
+        let ymax = self
+            .iter()
+            .map(|del| {
+                del.y()
+                    .into_iter()
+                    .max_by(|a, b| a.partial_cmp(b).unwrap())
+                    .unwrap()
+            })
+            .max_by(|a, b| a.partial_cmp(b).unwrap())
+            .unwrap();
+
+        let xrange = xmin.floor()..xmax.ceil();
+        let yrange = ymin.floor()..ymax.ceil();
+
+        let mut chart = ChartBuilder::on(&fig)
+            .set_label_area_size(LabelAreaPosition::Left, 40)
+            .set_label_area_size(LabelAreaPosition::Bottom, 40)
+            .margin(20)
+            .build_cartesian_2d(xrange.clone(), yrange)
+            .unwrap();
+        let mut mesh = chart.configure_mesh();
+        mesh.draw().unwrap();
+
+        for del in self.iter() {
+            del.triangle_iter()
+                .map(|t| {
+                    t.iter()
+                        .map(|&i| (del.x()[i], del.y()[i]))
+                        .collect::<Vec<(f64, f64)>>()
+                })
+                .into_iter()
+                .for_each(|v| {
+                    chart
+                        .draw_series(LineSeries::new(
+                            v.iter().cycle().take(4).map(|(x, y)| (*x, *y)),
+                            &BLACK,
+                        ))
+                        .unwrap();
+                });
+        }
     }
 }

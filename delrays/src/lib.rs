@@ -7,9 +7,11 @@ use triangle_rs::Delaunay;
 mod delaunay;
 mod gmt;
 mod opd;
+mod set;
 pub use delaunay::Mesh;
 pub use gmt::Gmt;
 pub use opd::{Opd, Opds};
+pub use set::Set;
 
 #[derive(Debug, thiserror::Error)]
 pub enum DelraysError {
