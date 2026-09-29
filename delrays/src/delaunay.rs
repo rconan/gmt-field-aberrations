@@ -5,6 +5,8 @@ use triangle_rs::{Builder, Delaunay};
 
 use crate::Set;
 
+const CLEAR_APERTURE_DIAMETER: f64 = 8.365;
+
 #[derive(Debug, thiserror::Error)]
 pub enum MeshError {
     #[error(
@@ -43,7 +45,7 @@ pub trait Mesh {
         if !(id > 0 && id < 8) {
             return Err(MeshError::WrongSid(id));
         };
-        let rim_diameter = 8.365;
+        let rim_diameter = CLEAR_APERTURE_DIAMETER;
         let delta_rim = 1f64 / 4f64;
         let origin = (id < 7).then_some({
             let o = (3 - 2 * (id - 1)) as f64 * f64::consts::FRAC_PI_6;
@@ -53,7 +55,7 @@ pub trait Mesh {
         Ok(Self::disc(rim_diameter, delta_rim, origin))
     }
     fn gmt() -> Set<Delaunay> {
-        let rim_diameter = 8.365;
+        let rim_diameter = CLEAR_APERTURE_DIAMETER;
         let delta_rim = 1f64 / 4f64;
         let mut segment = vec![];
         for id in 1..=7 {
