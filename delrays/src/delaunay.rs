@@ -33,7 +33,7 @@ pub trait Mesh {
             .collect();
         builder.add_polygon(&outer_rim).add_nodes(&[x0, y0]);
         builder
-            .set_switches(&format!("Qpqa{}", triangle_area))
+            .set_switches(&format!("QDpqa{}", triangle_area))
             .build()
     }
     fn gmt_segment() -> Result<Delaunay, MeshError> {
