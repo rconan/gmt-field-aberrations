@@ -2,6 +2,7 @@
 name = "delrays"
 version = "0.1.0"
 edition = "2024"
+default-run = "main"
 
 [dependencies]
 anyhow.workspace = true
