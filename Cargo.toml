@@ -14,9 +14,10 @@ triangle-rs = "0.1.2"
 serde-pickle = "1.2.0"
 rayon = "1.12.0"
 clap = { version = "4.6.1", features = ["derive"] }
-anyhow = "1.0.102"
 crseo = "2.5.3"
 serde = { version = "1.0.229", features = ["derive"] }
+thiserror = "2.0.21"
+anyhow = "1.0.104"
 
 [dependencies]
 crseo.workspace = true
@@ -26,7 +27,6 @@ rson = "0.1.0"
 serde.workspace = true
 serde-pickle.workspace = true
 skyangle.workspace = true
-thiserror = "2.0.18"
 zernike = "0.2.2"
 color-eyre.workspace = true
 ron = "0.12.1"
@@ -34,6 +34,7 @@ rayon.workspace = true
 anyhow.workspace = true
 faer = "0.24.0"
 geotrans = "1.2.0"
+thiserror.workspace = true
 
 [dev-dependencies]
 triangle-rs.workspace = true

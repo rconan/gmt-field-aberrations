@@ -9,4 +9,5 @@ crseo.workspace = true
 plotters = "0.3.7"
 serde.workspace = true
 serde-pickle.workspace = true
+thiserror.workspace = true
 triangle-rs.workspace = true
