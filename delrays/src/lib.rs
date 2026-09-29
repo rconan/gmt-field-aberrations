@@ -7,7 +7,7 @@ mod opd;
 mod set;
 pub use delaunay::Mesh;
 pub use gmt::Gmt;
-pub use opd::{Opd, Opds};
+pub use opd::{Opd, Opds, Stats};
 pub use set::Set;
 
 #[derive(Debug, thiserror::Error)]
