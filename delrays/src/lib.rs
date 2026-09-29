@@ -1,7 +1,4 @@
-use crseo::{
-    FromBuilder,
-    raytracing::{Rays, RaysBuilder},
-};
+use crseo::{Builder, CrseoError, FromBuilder, raytracing::Rays};
 use triangle_rs::Delaunay;
 
 mod delaunay;
@@ -20,21 +17,29 @@ pub enum DelraysError {
 }
 
 pub trait RayTracing {
-    fn ray_tracing(self, rays: &mut Rays);
+    fn ray_tracing(&mut self, rays: &mut Rays);
 }
 pub trait Trace {
-    fn from_mesh(mesh: &Delaunay) -> RaysBuilder;
-    fn trace(&mut self, object: impl RayTracing);
-    fn opds(&mut self) -> Opds;
+    type From;
+    type OpdData;
+    fn from_mesh(mesh: &Self::From) -> Result<Self, CrseoError>
+    where
+        Self: Sized;
+    fn trace<T: RayTracing>(&mut self, object: &mut T);
+    fn opds(&mut self) -> Self::OpdData;
 }
 impl Trace for Rays {
-    fn from_mesh(mesh: &Delaunay) -> RaysBuilder {
-        Rays::builder().xy(mesh.vertex_iter().flatten().cloned().collect())
+    type From = Delaunay;
+    type OpdData = Opds;
+    fn from_mesh(mesh: &Self::From) -> Result<Self, CrseoError> {
+        Rays::builder()
+            .xy(mesh.vertex_iter().flatten().cloned().collect())
+            .build()
     }
-    fn trace(&mut self, object: impl RayTracing) {
+    fn trace<T: RayTracing>(&mut self, object: &mut T) {
         object.ray_tracing(self);
     }
-    fn opds(&mut self) -> Opds {
+    fn opds(&mut self) -> Self::OpdData {
         let opds = self.optical_path_difference();
         let xyz = self.coordinates();
         xyz.chunks(3)
@@ -44,5 +49,23 @@ impl Trace for Rays {
                 delta,
             })
             .collect()
+    }
+}
+impl Trace for Set<Rays> {
+    type From = Set<Delaunay>;
+    type OpdData = Set<Opds>;
+    fn from_mesh(mesh: &Self::From) -> Result<Self, CrseoError>
+    where
+        Self: Sized,
+    {
+        mesh.iter().map(|del| Rays::from_mesh(del)).collect()
+    }
+
+    fn trace<T: RayTracing>(&mut self, object: &mut T) {
+        self.iter_mut().for_each(|rays| rays.trace(object));
+    }
+
+    fn opds(&mut self) -> Self::OpdData {
+        self.iter_mut().map(|rays| rays.opds()).collect()
     }
 }

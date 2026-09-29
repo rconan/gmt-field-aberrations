@@ -23,8 +23,8 @@ impl Gmt {
         Ok(Self { m1, m2 })
     }
 }
-impl RayTracing for &mut Gmt {
-    fn ray_tracing(self, rays: &mut Rays) {
+impl RayTracing for Gmt {
+    fn ray_tracing(&mut self, rays: &mut Rays) {
         self.m1.trace(rays);
         self.m2.trace(rays);
         rays.to_sphere(-5.83, 2.197173);

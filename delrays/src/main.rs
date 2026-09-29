@@ -1,6 +1,6 @@
 use std::fs::File;
 
-use crseo::{Builder, raytracing::Rays};
+use crseo::raytracing::Rays;
 use delrays::{Gmt, Mesh, Trace};
 use triangle_rs::Delaunay;
 
@@ -10,7 +10,7 @@ fn main() -> anyhow::Result<()> {
     delaunay.plot();
     println!("{}", delaunay);
 
-    let mut rays: Rays = Rays::from_mesh(&delaunay).build()?;
+    let mut rays: Rays = Rays::from_mesh(&delaunay)?;
     dbg!(rays.chief_coordinates());
 
     let mut gmt = Gmt::new()?;
