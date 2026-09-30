@@ -10,12 +10,15 @@ pub mod delaunay;
 pub mod gmt;
 mod opd;
 mod set;
+mod zernikes;
+
 #[doc(inline)]
 pub use delaunay::Mesh;
 #[doc(inline)]
 pub use gmt::Gmt;
 pub use opd::{Opd, Opds, Stats};
 pub use set::Set;
+pub use zernikes::{Mode, Zernike};
 
 #[derive(Debug, thiserror::Error)]
 pub enum DelraysError {

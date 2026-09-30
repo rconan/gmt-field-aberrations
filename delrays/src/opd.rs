@@ -1,16 +1,56 @@
 use std::fmt::Display;
 
+use faer::MatRef;
 use serde::{Deserialize, Serialize};
 
-use crate::Set;
+use crate::{Mode, Set, Zernike};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct Opd {
     pub(crate) xyz: [f64; 3],
     pub(crate) delta: f64,
 }
+
+impl Opd {
+    pub fn match_coordinates(&self, other: &Opd) -> bool {
+        self.xyz
+            .iter()
+            .zip(other.xyz.iter())
+            .all(|(lhs, rhs)| lhs == rhs)
+    }
+}
+
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct Opds(Vec<Opd>);
+
+impl Opds {
+    pub fn as_zernikes(&self, n_radial_order: usize) -> Set<Mode> {
+        let mut zerns = Set::<Mode>::new(self.0.iter().map(|opd| &opd.xyz[..2]), n_radial_order);
+        let delta: Vec<_> = self.0.iter().map(|opd| opd.delta).collect();
+        let mat = MatRef::<f64>::from_column_major_slice(&delta, delta.len(), 1);
+        let a = zerns.pseudo_inverse() * mat;
+        a.col(0).iter().zip(zerns.iter_mut()).for_each(|(c, z)| {
+            z.coef = *c;
+        });
+        zerns
+    }
+    pub fn sub(&self, rhs: &Opds) -> Option<Opds> {
+        self.0
+            .iter()
+            .zip(rhs.0.iter())
+            .map(|(lhs, rhs)| {
+                if lhs.match_coordinates(rhs) {
+                    Some(Opd {
+                        xyz: rhs.xyz.clone(),
+                        delta: rhs.delta - lhs.delta,
+                    })
+                } else {
+                    None
+                }
+            })
+            .collect()
+    }
+}
 
 impl FromIterator<Opd> for Opds {
     fn from_iter<T: IntoIterator<Item = Opd>>(iter: T) -> Self {
@@ -69,6 +109,7 @@ impl From<&Opds> for Stats {
         }
     }
 }
+
 impl From<&Set<Opds>> for Stats {
     fn from(set: &Set<Opds>) -> Self {
         let (n_sample, mins, maxs, means, vars) = set.iter().fold(

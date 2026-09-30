@@ -1,7 +1,7 @@
-use std::{f64, fs::File};
+use std::fs::File;
 
-use crseo::{FromBuilder, raytracing::Rays};
-use delrays::{Gmt, Mesh, Stats, Trace};
+use crseo::raytracing::Rays;
+use delrays::{Gmt, Mesh, Stats, Trace, Zernike};
 use skyangle::Conversion;
 use triangle_rs::Delaunay;
 
@@ -11,12 +11,7 @@ fn main() -> anyhow::Result<()> {
     delaunay.plot();
     println!("{}", delaunay);
 
-    let mut rays: Rays = Rays::from_mesh(
-        &delaunay,
-        Rays::builder()
-            .zenith(3f64.from_arcmin())
-            .azimuth(f64::consts::FRAC_PI_2),
-    )?;
+    let mut rays: Rays = Rays::from_mesh(&delaunay, Default::default())?;
     dbg!(rays.chief_coordinates());
 
     let mut gmt = Gmt::new()?;
@@ -25,6 +20,9 @@ fn main() -> anyhow::Result<()> {
     let opds = rays.opds();
     println!("{}", Stats::from(&opds));
     serde_pickle::to_writer(&mut File::create("opds.pkl")?, &opds, Default::default())?;
+
+    let zs = opds.as_zernikes(4);
+    dbg!(zs.coefficients());
 
     Ok(())
 }
