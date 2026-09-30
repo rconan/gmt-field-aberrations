@@ -8,7 +8,7 @@ use triangle_rs::Delaunay;
 
 pub mod delaunay;
 pub mod gmt;
-mod opd;
+pub mod opd;
 mod set;
 mod zernikes;
 
@@ -16,7 +16,7 @@ mod zernikes;
 pub use delaunay::Mesh;
 #[doc(inline)]
 pub use gmt::Gmt;
-pub use opd::{Opd, Opds, Stats};
+use opd::{Opd, Opds};
 pub use set::Set;
 pub use zernikes::{Mode, Zernike};
 

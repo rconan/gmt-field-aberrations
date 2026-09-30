@@ -1,3 +1,5 @@
+//! Rays optical path differences
+
 use std::fmt::Display;
 
 use faer::MatRef;
@@ -5,6 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{Mode, Set, Zernike};
 
+/// Single ray optical path difference
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct Opd {
     pub(crate) xyz: [f64; 3],
@@ -12,6 +15,7 @@ pub struct Opd {
 }
 
 impl Opd {
+    /// Checks if two OPDs share the same coordinates
     pub fn match_coordinates(&self, other: &Opd) -> bool {
         self.xyz
             .iter()
@@ -20,10 +24,12 @@ impl Opd {
     }
 }
 
+/// Rays optical path differences
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct Opds(Vec<Opd>);
 
 impl Opds {
+    /// Project OPDs on Zernike modes
     pub fn as_zernikes(&self, n_radial_order: usize) -> Set<Mode> {
         let mut zerns = Set::<Mode>::new(self.0.iter().map(|opd| &opd.xyz[..2]), n_radial_order);
         let delta: Vec<_> = self.0.iter().map(|opd| opd.delta).collect();
@@ -34,6 +40,9 @@ impl Opds {
         });
         zerns
     }
+    /// Substract two OPDs
+    ///
+    /// Returns None if coordinates do not match
     pub fn sub(&self, rhs: &Opds) -> Option<Opds> {
         self.0
             .iter()
@@ -58,6 +67,7 @@ impl FromIterator<Opd> for Opds {
     }
 }
 
+/// OPDs statistics
 #[derive(Default, Debug, Clone)]
 pub struct Stats {
     n_sample: usize,
