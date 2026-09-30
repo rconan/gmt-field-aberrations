@@ -1,3 +1,5 @@
+//! # Delaunay triangulation meshes
+
 use std::{env, f64, num::ParseIntError};
 
 use plotters::prelude::*;
@@ -17,7 +19,9 @@ pub enum MeshError {
     WrongSid(i32),
 }
 
+/// Specialized mesh builders
 pub trait Mesh {
+    /// Makes a mesh for a disc
     fn disc(diameter: f64, perimeter_pitch: f64, origin: Option<[f64; 2]>) -> Delaunay {
         let [x0, y0] = origin.unwrap_or([0f64; 2]);
         let mut builder = Builder::new();
@@ -36,6 +40,7 @@ pub trait Mesh {
             .set_switches(&format!("QDpqa{}", triangle_area))
             .build()
     }
+    /// Makes a mesh for a GMT segment
     fn gmt_segment() -> Result<Delaunay, MeshError> {
         let id = if let Ok(sid) = env::var("SID") {
             sid.parse::<i32>()?
@@ -54,6 +59,7 @@ pub trait Mesh {
         });
         Ok(Self::disc(rim_diameter, delta_rim, origin))
     }
+    /// Makes a set of meshes for the GMT segments
     fn gmt() -> Set<Delaunay> {
         let rim_diameter = CLEAR_APERTURE_DIAMETER;
         let delta_rim = 1f64 / 4f64;
@@ -68,6 +74,7 @@ pub trait Mesh {
         }
         Set(segment)
     }
+    /// Plots the meshes
     fn plot(&self);
 }
 

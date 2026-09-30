@@ -1,13 +1,18 @@
+//! # Field aberrations for 2 mirror telescopes
+
 use crseo::{
-    Builder, CrseoError, raytracing::{Rays, RaysBuilder},
+    Builder, CrseoError,
+    raytracing::{Rays, RaysBuilder},
 };
 use triangle_rs::Delaunay;
 
-mod delaunay;
-mod gmt;
+pub mod delaunay;
+pub mod gmt;
 mod opd;
 mod set;
+#[doc(inline)]
 pub use delaunay::Mesh;
+#[doc(inline)]
 pub use gmt::Gmt;
 pub use opd::{Opd, Opds, Stats};
 pub use set::Set;
@@ -18,16 +23,24 @@ pub enum DelraysError {
     Crseo(#[from] crseo::CrseoError),
 }
 
+/// Ray tracing through an optical system
 pub trait RayTracing {
+    /// Draws rays through the system
     fn ray_tracing(&mut self, rays: &mut Rays);
 }
+/// [Rays] extensions
 pub trait Trace {
+    /// Type of the object used to initialize the [Rays] coordinates
     type From;
+    /// Type of the object that contains the [Rays] optical path differences
     type OpdData;
+    /// Creates a new object from a mesh and a [Rays] builder
     fn from_mesh(mesh: &Self::From, builder: RaysBuilder) -> Result<Self, CrseoError>
     where
         Self: Sized;
+    /// Traces the [Rays]
     fn trace<T: RayTracing>(&mut self, object: &mut T);
+    /// Retrieves the [Rays] OPD
     fn opds(&mut self) -> Self::OpdData;
 }
 impl Trace for Rays {

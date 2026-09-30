@@ -1,27 +1,40 @@
+//! # GMT optical prescription
+
 use crseo::{
     Builder, CrseoError, FromBuilder,
     raytracing::{Conic, Rays},
 };
 
+/// M1 optical parameters
 pub mod m1 {
+    /// Conic constant
     pub const CONIC: f64 = 0.9982857;
+    /// Mirror curvature
     pub const CURVATURE: f64 = 36.;
 }
+/// M2 optical parameters
 pub mod m2 {
+    /// Conic constant
     pub const CONIC: f64 = 0.71692784;
+    /// Mirror curvature
     pub const CURVATURE: f64 = -4.1639009;
+    /// Mirror height
     pub const HEIGHT: f64 = 20.26247614;
 }
+/// Focal plane height
 pub const FOCAL_PLANE_Z: f64 = -5.83;
+/// Focal surface radius
 pub const FOCAL_PLANE_RADIUS: f64 = 2.197173;
 
 use crate::RayTracing;
 
+/// GMT M1 and M2 optical model
 pub struct Gmt {
     m1: Conic,
     m2: Conic,
 }
 impl Gmt {
+    /// Creates a new [Gmt] instance
     pub fn new() -> Result<Self, CrseoError> {
         let m1 = Conic::builder()
             .conic_cst(1. - m1::CONIC)
