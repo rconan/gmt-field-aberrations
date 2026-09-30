@@ -42,7 +42,7 @@ pub trait Trace {
     where
         Self: Sized;
     /// Traces the [Rays]
-    fn trace<T: RayTracing>(&mut self, object: &mut T);
+    fn trace<T: RayTracing>(&mut self, object: &mut T) -> &mut Self;
     /// Retrieves the [Rays] OPD
     fn opds(&mut self) -> Self::OpdData;
 }
@@ -54,8 +54,9 @@ impl Trace for Rays {
             .xy(mesh.vertex_iter().flatten().cloned().collect())
             .build()
     }
-    fn trace<T: RayTracing>(&mut self, object: &mut T) {
+    fn trace<T: RayTracing>(&mut self, object: &mut T) -> &mut Self {
         object.ray_tracing(self);
+        self
     }
     fn opds(&mut self) -> Self::OpdData {
         let opds = self.optical_path_difference();
@@ -81,8 +82,11 @@ impl Trace for Set<Rays> {
             .collect()
     }
 
-    fn trace<T: RayTracing>(&mut self, object: &mut T) {
-        self.iter_mut().for_each(|rays| rays.trace(object));
+    fn trace<T: RayTracing>(&mut self, object: &mut T) -> &mut Self {
+        self.iter_mut().for_each(|rays| {
+            rays.trace(object);
+        });
+        self
     }
 
     fn opds(&mut self) -> Self::OpdData {
