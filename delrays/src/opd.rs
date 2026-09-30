@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     Set,
-    zernikes::{Mode, Zernike},
+    zernikes::{AsZernikes, Mode, Zernike},
 };
 
 /// Single ray optical path difference
@@ -30,9 +30,10 @@ impl Opd {
 /// Rays optical path differences
 pub type Opds = Set<Opd>;
 
-impl Opds {
+impl AsZernikes for Opds {
+    type Into = Set<Mode>;
     /// Project OPDs on Zernike modes
-    pub fn as_zernikes(&self, n_radial_order: usize) -> Set<Mode> {
+    fn as_zernikes(&self, n_radial_order: usize) -> Self::Into {
         let mut zerns = Set::<Mode>::new(self.0.iter().map(|opd| &opd.xyz[..2]), n_radial_order);
         let delta: Vec<_> = self.0.iter().map(|opd| opd.delta).collect();
         let mat = MatRef::<f64>::from_column_major_slice(&delta, delta.len(), 1);
@@ -42,6 +43,8 @@ impl Opds {
         });
         zerns
     }
+}
+impl Opds {
     /// Substract two OPDs
     ///
     /// Returns None if coordinates do not match

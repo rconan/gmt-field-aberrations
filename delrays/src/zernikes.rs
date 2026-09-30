@@ -1,16 +1,17 @@
-use faer::Mat;
+use faer::{Mat, MatRef};
 use serde::{Deserialize, Serialize};
 
 use crate::Set;
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
-pub struct Mode {
-    pub(crate) jnm: (usize, usize, usize),
+pub struct Mode<C = f64> {
+    pub jnm: (usize, usize, usize),
     pub(crate) mode: Vec<f64>,
-    pub(crate) coef: f64,
+    pub coef: C,
 }
 
 pub trait Zernike {
+    type Coefs;
     fn new<'a>(xy: impl Iterator<Item = &'a [f64]>, n_radial_order: usize) -> Set<Mode> {
         let (mut r, o): (Vec<f64>, Vec<f64>) = xy
             .map(|xy| (xy[0].hypot(xy[1]), xy[1].atan2(xy[0])))
@@ -41,11 +42,13 @@ pub trait Zernike {
             .collect()
     }
     fn pseudo_inverse(&self) -> Mat<f64>;
-    fn coefficients(&self) -> Vec<f64>;
-    fn reduce_into(self, j: &[usize]) -> Self;
+    fn jnm(&self) -> Vec<(usize, usize, usize)>;
+    fn coefficients(&self) -> Self::Coefs;
+    fn reduce_into(self, j: impl IntoIterator<Item = usize>) -> Self;
 }
 
-impl Zernike for Set<Mode> {
+impl<C: Clone> Zernike for Set<Mode<C>> {
+    type Coefs = Vec<C>;
     fn pseudo_inverse(&self) -> Mat<f64> {
         let ncols = self.len();
         let nrows = self[0].mode.len();
@@ -55,13 +58,17 @@ impl Zernike for Set<Mode> {
         svd.pseudoinverse()
     }
 
-    fn coefficients(&self) -> Vec<f64> {
-        self.iter().map(|mode| mode.coef).collect()
+    fn jnm(&self) -> Vec<(usize, usize, usize)> {
+        self.iter().map(|mode| mode.jnm.clone()).collect()
     }
 
-    fn reduce_into(self, j: &[usize]) -> Self {
-        j.iter()
-            .flat_map(|j| self.iter().filter(|mode| mode.jnm.0 == *j))
+    fn coefficients(&self) -> Self::Coefs {
+        self.iter().map(|mode| mode.coef.clone()).collect()
+    }
+
+    fn reduce_into(self, j: impl IntoIterator<Item = usize>) -> Self {
+        j.into_iter()
+            .flat_map(|j| self.iter().filter(move |mode| mode.jnm.0 == j))
             .cloned()
             .collect()
     }
@@ -76,5 +83,44 @@ pub struct FieldZernike {
 impl FieldZernike {
     pub fn new(za: (f64, f64), modes: Set<Mode>) -> Self {
         Self { za, modes }
+    }
+}
+
+pub trait AsZernikes {
+    type Into;
+    fn as_zernikes(&self, n_radial_order: usize) -> Self::Into;
+}
+
+impl AsZernikes for Set<FieldZernike> {
+    type Into = Set<Mode<Set<Mode>>>;
+    fn as_zernikes(&self, n_radial_order: usize) -> Self::Into {
+        let xy: Vec<_> = self
+            .iter()
+            .map(|field| {
+                let (z, a) = field.za;
+                let (s, c) = a.sin_cos();
+                [z * c, z * s]
+            })
+            .collect();
+        let mut zerns = Set::<Mode>::new(xy.iter().map(|xy| xy.as_slice()), n_radial_order);
+        let n_mode = self.0[0].modes.len();
+        let pinv = zerns.pseudo_inverse();
+        let mut modes = vec![];
+        for i in 0..n_mode {
+            let c: Vec<_> = self.iter().map(|field| field.modes[i].coef).collect();
+            let mat = MatRef::<f64>::from_column_major_slice(&c, c.len(), 1);
+            let a = &pinv * mat;
+
+            a.col(0).iter().zip(zerns.iter_mut()).for_each(|(c, z)| {
+                z.coef = *c;
+            });
+            let Mode { jnm, mode, .. } = self[0].modes[i].clone();
+            modes.push(Mode {
+                jnm,
+                mode,
+                coef: zerns.clone(),
+            });
+        }
+        modes.into_iter().collect()
     }
 }
