@@ -18,7 +18,7 @@ pub use delaunay::Mesh;
 pub use gmt::Gmt;
 use opd::{Opd, Opds};
 pub use set::Set;
-pub use zernikes::{Mode, Zernike};
+pub use zernikes::{FieldZernike, Mode, Zernike};
 
 #[derive(Debug, thiserror::Error)]
 pub enum DelraysError {

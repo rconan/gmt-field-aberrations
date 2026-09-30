@@ -42,6 +42,7 @@ pub trait Zernike {
     }
     fn pseudo_inverse(&self) -> Mat<f64>;
     fn coefficients(&self) -> Vec<f64>;
+    fn reduce_into(self, j: &[usize]) -> Self;
 }
 
 impl Zernike for Set<Mode> {
@@ -56,5 +57,24 @@ impl Zernike for Set<Mode> {
 
     fn coefficients(&self) -> Vec<f64> {
         self.iter().map(|mode| mode.coef).collect()
+    }
+
+    fn reduce_into(self, j: &[usize]) -> Self {
+        j.iter()
+            .flat_map(|j| self.iter().filter(|mode| mode.jnm.0 == *j))
+            .cloned()
+            .collect()
+    }
+}
+
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+pub struct FieldZernike {
+    za: (f64, f64),
+    modes: Set<Mode>,
+}
+
+impl FieldZernike {
+    pub fn new(za: (f64, f64), modes: Set<Mode>) -> Self {
+        Self { za, modes }
     }
 }
