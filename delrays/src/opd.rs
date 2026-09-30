@@ -25,8 +25,7 @@ impl Opd {
 }
 
 /// Rays optical path differences
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
-pub struct Opds(Vec<Opd>);
+pub type Opds = Set<Opd>;
 
 impl Opds {
     /// Project OPDs on Zernike modes
@@ -58,12 +57,6 @@ impl Opds {
                 }
             })
             .collect()
-    }
-}
-
-impl FromIterator<Opd> for Opds {
-    fn from_iter<T: IntoIterator<Item = Opd>>(iter: T) -> Self {
-        Self(iter.into_iter().collect())
     }
 }
 
