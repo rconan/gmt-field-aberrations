@@ -5,7 +5,10 @@ use std::fmt::Display;
 use faer::MatRef;
 use serde::{Deserialize, Serialize};
 
-use crate::{Mode, Set, Zernike};
+use crate::{
+    Set,
+    zernikes::{Mode, Zernike},
+};
 
 /// Single ray optical path difference
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]

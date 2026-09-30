@@ -1,7 +1,10 @@
 use std::fs::File;
 
 use crseo::{FromBuilder, raytracing::Rays};
-use delrays::{FieldZernike, Gmt, Mesh, Trace, Zernike};
+use delrays::{
+    Gmt, Mesh, Trace,
+    zernikes::{FieldZernike, Zernike},
+};
 use skyangle::Conversion;
 use triangle_rs::Delaunay;
 
