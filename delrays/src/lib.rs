@@ -1,5 +1,7 @@
 //! # Field aberrations for 2 mirror telescopes
 
+use std::fmt::Debug;
+
 use crseo::{
     Builder, CrseoError,
     raytracing::{Rays, RaysBuilder},
@@ -11,6 +13,7 @@ pub mod gmt;
 pub mod opd;
 mod set;
 pub mod zernikes;
+pub mod pickle;
 
 #[doc(inline)]
 pub use delaunay::Mesh;
@@ -92,3 +95,4 @@ impl Trace for Set<Rays> {
         self.iter_mut().map(|rays| rays.opds()).collect()
     }
 }
+
