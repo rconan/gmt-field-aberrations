@@ -132,10 +132,10 @@ impl AsZernikes for Set<FieldZernike> {
             a.col(0).iter().zip(zerns.iter_mut()).for_each(|(c, z)| {
                 z.coef = *c;
             });
-            let Mode { jnm, mode, .. } = self[0].modes[i].clone();
+            let Mode { jnm, .. } = self[0].modes[i].clone();
             modes.push(Mode {
                 jnm,
-                mode,
+                mode: c,
                 coef: zerns.clone(),
             });
         }
