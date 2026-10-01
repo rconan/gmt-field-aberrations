@@ -16,8 +16,4 @@ pub use set::Set;
 #[doc(inline)]
 pub use trace::Trace;
 
-#[derive(Debug, thiserror::Error)]
-pub enum DelraysError {
-    #[error("crseo failure")]
-    Crseo(#[from] crseo::CrseoError),
-}
+impl<T: serde::Serialize> pickle::Pickle for Set<T> {}
