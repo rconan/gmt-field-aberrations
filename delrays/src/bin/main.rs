@@ -1,7 +1,11 @@
 use std::fs::File;
 
 use crseo::raytracing::Rays;
-use delrays::{Gmt, Mesh, Trace, opd::Stats, zernikes::{AsZernikes, Zernike}};
+use delrays::{
+    Gmt, Mesh, Trace,
+    opd::Stats,
+    zernikes::{AsZernikes, Zernike},
+};
 use skyangle::Conversion;
 use triangle_rs::Delaunay;
 
@@ -22,6 +26,7 @@ fn main() -> anyhow::Result<()> {
     serde_pickle::to_writer(&mut File::create("opds.pkl")?, &opds, Default::default())?;
 
     let zs = opds.as_zernikes(4);
+    println!("{:+6.0?}", zs.speye());
     dbg!(zs.coefficients());
 
     Ok(())

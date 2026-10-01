@@ -59,6 +59,8 @@ pub trait Zernike {
     fn coefficients(&self) -> Vec<Self::Coefs>;
     /// Reduces the Zernike basis to the given modes
     fn reduce_into(self, j: impl IntoIterator<Item = usize>) -> Self;
+    /// Return the modes self-projection matrix
+    fn speye(&self) -> Mat<f64>;
 }
 
 impl<C: Clone> Zernike for Set<Mode<C>> {
@@ -85,6 +87,14 @@ impl<C: Clone> Zernike for Set<Mode<C>> {
             .flat_map(|j| self.iter().filter(move |mode| mode.jnm.0 == j))
             .cloned()
             .collect()
+    }
+
+    fn speye(&self) -> Mat<f64> {
+        let ncols = self.len();
+        let nrows = self[0].mode.len();
+        let zerns: Vec<_> = self.iter().flat_map(|mode| mode.mode.to_vec()).collect();
+        let mat = faer::MatRef::from_column_major_slice(&zerns, nrows, ncols);
+        mat.transpose() * mat
     }
 }
 
