@@ -6,10 +6,9 @@ use delrays::{
     zernikes::{AsZernikes, FieldZernike, Zernike},
 };
 use skyangle::Conversion;
-use triangle_rs::Delaunay;
 
 fn main() -> anyhow::Result<()> {
-    let field_mesh = Delaunay::disc(20f64, 2., None);
+    let field_mesh = Mesh::disc(20f64, 2., None);
     field_mesh.plot();
     // println!("{field_mesh}");
 
@@ -18,7 +17,7 @@ fn main() -> anyhow::Result<()> {
         .map(|xy| (xy[0].hypot(xy[1]), xy[1].atan2(xy[0])));
 
     // segment ID set with environment variable SID (or set to 7 if not present)
-    let delaunay = Delaunay::gmt_segment()?;
+    let delaunay = Mesh::gmt_segment()?;
     // println!("{}", delaunay);
 
     let mut gmt = Gmt::new()?;

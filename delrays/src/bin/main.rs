@@ -7,11 +7,10 @@ use delrays::{
     zernikes::{AsZernikes, Zernike},
 };
 use skyangle::Conversion;
-use triangle_rs::Delaunay;
 
 fn main() -> anyhow::Result<()> {
     // segment ID set with environment variable SID (or set to 7 if not present)
-    let delaunay = Delaunay::gmt_segment()?;
+    let delaunay = Mesh::gmt_segment()?;
     delaunay.plot();
     println!("{}", delaunay);
 

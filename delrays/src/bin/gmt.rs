@@ -1,12 +1,11 @@
 use std::{f64, fs::File};
 
 use crseo::{FromBuilder, raytracing::Rays};
-use delrays::{Gmt, Mesh, Set, opd::Stats, Trace};
+use delrays::{Gmt, Mesh, Set, Trace, opd::Stats};
 use skyangle::Conversion;
-use triangle_rs::Delaunay;
 
 fn main() -> anyhow::Result<()> {
-    let delaunay = Set::<Delaunay>::gmt();
+    let delaunay = Mesh::gmt();
     delaunay.plot();
     // println!("{}", delaunay);
 

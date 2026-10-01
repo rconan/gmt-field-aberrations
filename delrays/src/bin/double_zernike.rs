@@ -6,12 +6,11 @@ use delrays::{
     zernikes::{AsZernikes, FieldZernike, Zernike},
 };
 use skyangle::Conversion;
-use triangle_rs::Delaunay;
 
 const PUPIL_MODES: [usize; 2] = [5, 6];
 
 fn main() -> anyhow::Result<()> {
-    let field_mesh = Delaunay::disc(20f64, 2., None);
+    let field_mesh = Mesh::disc(20f64, 2., None);
     field_mesh.plot();
     // println!("{field_mesh}");
 
@@ -22,7 +21,7 @@ fn main() -> anyhow::Result<()> {
         write!(lock, "{id}").unwrap();
         lock.flush().unwrap();
 
-        let delaunay = Delaunay::gmt_segment_with_id(id)?;
+        let delaunay = Mesh::gmt_segment_with_id(id)?;
 
         let mut gmt = Gmt::new()?;
 

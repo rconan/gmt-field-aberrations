@@ -1,6 +1,11 @@
 //! # Delaunay triangulation meshes
 
-use std::{env, f64, num::ParseIntError};
+use std::{
+    env, f64,
+    fmt::Display,
+    num::ParseIntError,
+    ops::{Deref, DerefMut},
+};
 
 use plotters::prelude::*;
 use triangle_rs::{Builder, Delaunay};
@@ -20,9 +25,30 @@ pub enum MeshError {
 }
 
 /// Specialized mesh builders
-pub trait Mesh {
+pub struct Mesh {
+    del: Delaunay,
+    origin: [f64; 2],
+}
+impl Deref for Mesh {
+    type Target = Delaunay;
+
+    fn deref(&self) -> &Self::Target {
+        &self.del
+    }
+}
+impl DerefMut for Mesh {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.del
+    }
+}
+impl Display for Mesh {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.del.fmt(f)
+    }
+}
+impl Mesh {
     /// Makes a mesh for a disc
-    fn disc(diameter: f64, perimeter_pitch: f64, origin: Option<[f64; 2]>) -> Delaunay {
+    pub fn disc(diameter: f64, perimeter_pitch: f64, origin: Option<[f64; 2]>) -> Self {
         let [x0, y0] = origin.unwrap_or([0f64; 2]);
         let mut builder = Builder::new();
         let triangle_area = perimeter_pitch.powi(2) * 3f64.sqrt() / 4f64;
@@ -36,12 +62,16 @@ pub trait Mesh {
             })
             .collect();
         builder.add_polygon(&outer_rim).add_nodes(&[x0, y0]);
-        builder
+        let del = builder
             .set_switches(&format!("QDpqa{}", triangle_area))
-            .build()
+            .build();
+        Self {
+            del,
+            origin: [x0, y0],
+        }
     }
     /// Makes a mesh for GMT segment #`id`
-    fn gmt_segment_with_id(id: i32) -> Result<Delaunay, MeshError> {
+    pub fn gmt_segment_with_id(id: i32) -> Result<Self, MeshError> {
         if !(id > 0 && id < 8) {
             return Err(MeshError::WrongSid(id));
         };
@@ -57,7 +87,7 @@ pub trait Mesh {
     /// Makes a mesh for a GMT segment
     ///
     // segment ID is set with environment variable SID (or set to 7 if not present)
-    fn gmt_segment() -> Result<Delaunay, MeshError> {
+    pub fn gmt_segment() -> Result<Self, MeshError> {
         let id = if let Ok(sid) = env::var("SID") {
             sid.parse::<i32>()?
         } else {
@@ -66,7 +96,7 @@ pub trait Mesh {
         Self::gmt_segment_with_id(id)
     }
     /// Makes a set of meshes for the GMT segments
-    fn gmt() -> Set<Delaunay> {
+    pub fn gmt() -> Set<Self> {
         let rim_diameter = CLEAR_APERTURE_DIAMETER;
         let delta_rim = 1f64 / 4f64;
         let mut segment = vec![];
@@ -80,12 +110,12 @@ pub trait Mesh {
         }
         Set(segment)
     }
-    /// Plots the meshes
-    fn plot(&self);
+    // Plots the meshes
+    // pub fn plot(&self);
 }
 
-impl Mesh for Delaunay {
-    fn plot(&self) {
+impl Mesh {
+    pub fn plot(&self) {
         let fig = SVGBackend::new("mesh.svg", (768, 768)).into_drawing_area();
         fig.fill(&WHITE).unwrap();
 
@@ -139,8 +169,8 @@ impl Mesh for Delaunay {
     }
 }
 
-impl Mesh for Set<Delaunay> {
-    fn plot(&self) {
+impl Set<Mesh> {
+    pub fn plot(&self) {
         let fig = SVGBackend::new("mesh.svg", (768, 768)).into_drawing_area();
         fig.fill(&WHITE).unwrap();
 

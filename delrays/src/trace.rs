@@ -5,8 +5,7 @@ use crseo::{
 use triangle_rs::Delaunay;
 
 use crate::{
-    Set,
-    opd::{Opd, Opds},
+    Mesh, Set, opd::{Opd, Opds},
 };
 
 /// Ray tracing through an optical system
@@ -54,7 +53,7 @@ impl Trace for Rays {
     }
 }
 impl Trace for Set<Rays> {
-    type From = Set<Delaunay>;
+    type From = Set<Mesh>;
     type OpdData = Set<Opds>;
     fn from_mesh(mesh: &Self::From, builder: RaysBuilder) -> Result<Self, CrseoError>
     where
