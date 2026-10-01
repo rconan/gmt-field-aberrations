@@ -14,6 +14,7 @@ fn main() -> anyhow::Result<()> {
     delaunay.plot();
     println!("{}", delaunay);
 
+
     let mut rays: Rays = Rays::from_mesh(&delaunay, Default::default())?;
     dbg!(rays.chief_coordinates());
 

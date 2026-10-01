@@ -110,11 +110,17 @@ impl Mesh {
         }
         Set(segment)
     }
-    // Plots the meshes
-    // pub fn plot(&self);
+    /// Return the index of the vertex that is the origin of the mesh
+    pub fn origin_vertex_position(&self) -> usize {
+        let [x0, y0] = self.origin;
+        self.vertex_iter()
+            .position(|xy| xy[0] == x0 && xy[1] == y0)
+            .unwrap()
+    }
 }
 
 impl Mesh {
+    // Plots the mesh
     pub fn plot(&self) {
         let fig = SVGBackend::new("mesh.svg", (768, 768)).into_drawing_area();
         fig.fill(&WHITE).unwrap();
@@ -170,6 +176,7 @@ impl Mesh {
 }
 
 impl Set<Mesh> {
+    // Plots the meshes
     pub fn plot(&self) {
         let fig = SVGBackend::new("mesh.svg", (768, 768)).into_drawing_area();
         fig.fill(&WHITE).unwrap();
