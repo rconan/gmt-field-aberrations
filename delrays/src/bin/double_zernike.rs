@@ -35,7 +35,8 @@ fn main() -> anyhow::Result<()> {
                 let mut rays: Rays = Rays::from_mesh(&delaunay, rays_builder)?;
                 let modes = rays
                     .trace(&mut gmt)
-                    .opds()
+                    .opds_centered(&delaunay)
+                    .unwrap()
                     .as_zernikes(4)
                     .reduce_into(PUPIL_MODES);
                 Ok(FieldZernike::new((zen, azi), modes))

@@ -14,14 +14,14 @@ fn main() -> anyhow::Result<()> {
     delaunay.plot();
     println!("{}", delaunay);
 
-
     let mut rays: Rays = Rays::from_mesh(&delaunay, Default::default())?;
     dbg!(rays.chief_coordinates());
 
     let mut gmt = Gmt::new()?;
     rays.trace(&mut gmt);
 
-    let opds = rays.opds();
+    // let opds = rays.opds();
+    let opds = rays.opds_centered(&delaunay).unwrap();
     println!("{}", Stats::from(&opds));
     serde_pickle::to_writer(&mut File::create("opds.pkl")?, &opds, Default::default())?;
 

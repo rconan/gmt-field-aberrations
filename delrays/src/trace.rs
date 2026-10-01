@@ -5,7 +5,8 @@ use crseo::{
 use triangle_rs::Delaunay;
 
 use crate::{
-    Mesh, Set, opd::{Opd, Opds},
+    Mesh, Set,
+    opd::{Opd, Opds},
 };
 
 /// Ray tracing through an optical system
@@ -27,6 +28,8 @@ pub trait Trace {
     fn trace<T: RayTracing>(&mut self, object: &mut T) -> &mut Self;
     /// Retrieves the [Rays] OPD
     fn opds(&mut self) -> Self::OpdData;
+    /// Retrieves the [Rays] OPD with cooordinates centered on mesh origin
+    fn opds_centered(&mut self, mesh: &Mesh) -> Option<Self::OpdData>;
 }
 impl Trace for Rays {
     type From = Delaunay;
@@ -51,6 +54,17 @@ impl Trace for Rays {
             })
             .collect()
     }
+
+    fn opds_centered(&mut self, mesh: &Mesh) -> Option<Self::OpdData> {
+        let mut opds = self.opds();
+        let cidx = mesh.origin_vertex_position();
+        let Some(Opd { xyz: origin, .. }) = opds.get(cidx).cloned() else {
+            return None;
+        };
+        opds.iter_mut()
+            .for_each(|Opd { xyz, .. }| xyz.iter_mut().zip(origin).for_each(|(x, o)| *x -= o));
+        Some(opds)
+    }
 }
 impl Trace for Set<Rays> {
     type From = Set<Mesh>;
@@ -73,5 +87,11 @@ impl Trace for Set<Rays> {
 
     fn opds(&mut self) -> Self::OpdData {
         self.iter_mut().map(|rays| rays.opds()).collect()
+    }
+
+    fn opds_centered(&mut self, mesh: &Mesh) -> Option<Self::OpdData> {
+        self.iter_mut()
+            .map(|rays| rays.opds_centered(mesh))
+            .collect()
     }
 }
