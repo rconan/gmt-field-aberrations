@@ -26,7 +26,7 @@ pub const FOCAL_PLANE_Z: f64 = -5.83;
 /// Focal surface radius
 pub const FOCAL_PLANE_RADIUS: f64 = 2.197173;
 
-use crate::RayTracing;
+use crate::trace::RayTracing;
 
 /// GMT M1 and M2 optical model
 pub struct Gmt {
