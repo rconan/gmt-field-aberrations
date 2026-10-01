@@ -1,8 +1,15 @@
+//! # Zernike basis
+
 use faer::{Mat, MatRef};
 use serde::{Deserialize, Serialize};
 
 use crate::Set;
 
+/// A Zernike mode or a Zernike coefficient field map
+///
+/// For a Zernike mode, the coefficient is a scalar (default) or
+/// if the mode is a field map of a particular Zernike coefficient
+/// then the coefficient is another [Set] of [Mode] with scalar coefficients
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct Mode<C = f64> {
     pub jnm: (usize, usize, usize),
@@ -10,8 +17,11 @@ pub struct Mode<C = f64> {
     pub coef: C,
 }
 
+/// Zernike basis traits
 pub trait Zernike {
+    /// Zernike coefficients type
     type Coefs;
+    /// Creates a new Zernike basis
     fn new<'a>(xy: impl Iterator<Item = &'a [f64]>, n_radial_order: usize) -> Set<Mode> {
         let (mut r, o): (Vec<f64>, Vec<f64>) = xy
             .map(|xy| (xy[0].hypot(xy[1]), xy[1].atan2(xy[0])))
@@ -41,14 +51,18 @@ pub trait Zernike {
             })
             .collect()
     }
+    /// Computes the pseudo-inverse of the Zernike basis
     fn pseudo_inverse(&self) -> Mat<f64>;
+    /// Returns the indices of the Zernike modes
     fn jnm(&self) -> Vec<(usize, usize, usize)>;
-    fn coefficients(&self) -> Self::Coefs;
+    /// Returns the coefficients of the Zernike modes
+    fn coefficients(&self) -> Vec<Self::Coefs>;
+    /// Reduces the Zernike basis to the given modes
     fn reduce_into(self, j: impl IntoIterator<Item = usize>) -> Self;
 }
 
 impl<C: Clone> Zernike for Set<Mode<C>> {
-    type Coefs = Vec<C>;
+    type Coefs = C;
     fn pseudo_inverse(&self) -> Mat<f64> {
         let ncols = self.len();
         let nrows = self[0].mode.len();
@@ -62,7 +76,7 @@ impl<C: Clone> Zernike for Set<Mode<C>> {
         self.iter().map(|mode| mode.jnm.clone()).collect()
     }
 
-    fn coefficients(&self) -> Self::Coefs {
+    fn coefficients(&self) -> Vec<Self::Coefs> {
         self.iter().map(|mode| mode.coef.clone()).collect()
     }
 
@@ -74,6 +88,7 @@ impl<C: Clone> Zernike for Set<Mode<C>> {
     }
 }
 
+/// A Zernike basis and a field location
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct FieldZernike {
     za: (f64, f64),
@@ -81,12 +96,15 @@ pub struct FieldZernike {
 }
 
 impl FieldZernike {
+    /// Associates a Zernike basis to a field point `(zenith,azimuth)`
     pub fn new(za: (f64, f64), modes: Set<Mode>) -> Self {
         Self { za, modes }
     }
 }
 
+/// Decomposition into Zernike modes
 pub trait AsZernikes {
+    /// Type of the modal expansion
     type Into;
     fn as_zernikes(&self, n_radial_order: usize) -> Self::Into;
 }
