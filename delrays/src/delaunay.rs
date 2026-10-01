@@ -40,13 +40,8 @@ pub trait Mesh {
             .set_switches(&format!("QDpqa{}", triangle_area))
             .build()
     }
-    /// Makes a mesh for a GMT segment
-    fn gmt_segment() -> Result<Delaunay, MeshError> {
-        let id = if let Ok(sid) = env::var("SID") {
-            sid.parse::<i32>()?
-        } else {
-            7
-        };
+    /// Makes a mesh for GMT segment #`id`
+    fn gmt_segment_with_id(id: i32) -> Result<Delaunay, MeshError> {
         if !(id > 0 && id < 8) {
             return Err(MeshError::WrongSid(id));
         };
@@ -58,6 +53,17 @@ pub trait Mesh {
             [8.71 * c, 8.71 * s]
         });
         Ok(Self::disc(rim_diameter, delta_rim, origin))
+    }
+    /// Makes a mesh for a GMT segment
+    ///
+    // segment ID is set with environment variable SID (or set to 7 if not present)
+    fn gmt_segment() -> Result<Delaunay, MeshError> {
+        let id = if let Ok(sid) = env::var("SID") {
+            sid.parse::<i32>()?
+        } else {
+            7
+        };
+        Self::gmt_segment_with_id(id)
     }
     /// Makes a set of meshes for the GMT segments
     fn gmt() -> Set<Delaunay> {
