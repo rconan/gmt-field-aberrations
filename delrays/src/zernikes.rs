@@ -3,7 +3,7 @@
 use faer::{Mat, MatRef};
 use serde::{Deserialize, Serialize};
 
-use crate::Set;
+use crate::{Mesh, Set};
 
 /// A Zernike mode or a Zernike coefficient field map
 ///
@@ -119,8 +119,11 @@ pub trait AsZernikes {
     fn as_zernikes(&self, n_radial_order: usize) -> Self::Into;
 }
 
+/// Decomposition of Zernike coeffients field map in to Zernike modes
+pub type FieldZernikeCoefficients = Set<Mode<Set<Mode>>>;
+
 impl AsZernikes for Set<FieldZernike> {
-    type Into = Set<Mode<Set<Mode>>>;
+    type Into = FieldZernikeCoefficients;
     fn as_zernikes(&self, n_radial_order: usize) -> Self::Into {
         let xy: Vec<_> = self
             .iter()
@@ -150,5 +153,23 @@ impl AsZernikes for Set<FieldZernike> {
             });
         }
         modes.into_iter().collect()
+    }
+}
+
+impl FieldZernikeCoefficients {
+    /// Returns the mean of the field maps of Zernike coefficient
+    pub fn mean(&self, field: &Mesh) -> Vec<f64> {
+        let areas = field.triangle_areas();
+        self.iter()
+            .map(|mode| {
+                field
+                    .triangle_iter()
+                    .map(|idx| idx.iter().map(|idx| mode.mode[*idx]).sum::<f64>() / 3f64)
+                    .zip(areas.iter())
+                    .map(|(vertex_mean, area)| area * vertex_mean)
+                    .sum::<f64>()
+                    / areas.len() as f64
+            })
+            .collect()
     }
 }
