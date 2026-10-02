@@ -47,6 +47,17 @@ impl Display for Mesh {
     }
 }
 impl Mesh {
+    /// Returns the weights of the mesh lump mass matrix
+    pub fn lump_mass_matrix_weights(&self) -> Vec<f64> {
+        let mut weights = vec![0f64; self.n_vertices()];
+        let areas = self.triangle_areas();
+        for (indices, area) in self.triangle_iter().zip(areas.into_iter()) {
+            for &idx in indices {
+                weights[idx] += area / 3f64;
+            }
+        }
+        weights
+    }
     /// Makes a mesh for a disc
     pub fn disc(diameter: f64, perimeter_pitch: f64, origin: Option<[f64; 2]>) -> Self {
         let [x0, y0] = origin.unwrap_or([0f64; 2]);

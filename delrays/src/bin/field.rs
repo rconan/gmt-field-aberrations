@@ -10,10 +10,9 @@ use delrays::{
 use skyangle::Conversion;
 
 fn main() -> anyhow::Result<()> {
-    let field_mesh = Mesh::disc(20f64, 0.5, None);
+    let field_mesh = Mesh::disc(20f64, 2., None);
     field_mesh.plot();
     println!("{field_mesh}");
-
     let iter = field_mesh
         .vertex_iter()
         .map(|xy| (xy[0].hypot(xy[1]), xy[1].atan2(xy[0])));

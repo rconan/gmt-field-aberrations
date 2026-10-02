@@ -1,4 +1,8 @@
-use std::io::{Write, stdout};
+use std::{
+    io::{Write, stdout},
+    thread,
+    time::Instant,
+};
 
 use crseo::{CrseoError, FromBuilder, raytracing::Rays};
 use delrays::{
@@ -10,42 +14,47 @@ use skyangle::Conversion;
 const PUPIL_MODES: [usize; 2] = [5, 6];
 
 fn main() -> anyhow::Result<()> {
-    let field_mesh = Mesh::disc(20f64, 2., None);
-    field_mesh.plot();
+    // field_mesh.plot();
     // println!("{field_mesh}");
 
     let mut lock = stdout().lock();
 
+    let now = Instant::now();
     let mut results = vec![];
     for id in 1..=7 {
         write!(lock, "{id}").unwrap();
         lock.flush().unwrap();
+        results.push(thread::spawn(move || {
+            let field_mesh = Mesh::disc(20f64, 0.5, None);
+            let delaunay = Mesh::gmt_segment_with_id(id).unwrap();
 
-        let delaunay = Mesh::gmt_segment_with_id(id)?;
+            let mut gmt = Gmt::new().unwrap();
 
-        let mut gmt = Gmt::new()?;
+            let iter = field_mesh
+                .vertex_iter()
+                .map(|xy| (xy[0].hypot(xy[1]), xy[1].atan2(xy[0])));
 
-        let iter = field_mesh
-            .vertex_iter()
-            .map(|xy| (xy[0].hypot(xy[1]), xy[1].atan2(xy[0])));
-
-        let field_zernikes = iter
-            .map(|(zen, azi)| {
-                let rays_builder = Rays::builder().zenith(zen.from_arcmin()).azimuth(azi);
-                let mut rays: Rays = Rays::from_mesh(&delaunay, rays_builder)?;
-                let modes = rays
-                    .trace(&mut gmt)
-                    .opds_centered(&delaunay)
-                    .unwrap()
-                    .as_zernikes(4)
-                    .reduce_into(PUPIL_MODES);
-                Ok(FieldZernike::new((zen, azi), modes))
-            })
-            .collect::<Result<Set<FieldZernike>, CrseoError>>()?;
-        let field_zern_coefs = field_zernikes.as_zernikes(4);
-        results.push(field_zern_coefs);
+            let field_zernikes = iter
+                .map(|(zen, azi)| {
+                    let rays_builder = Rays::builder().zenith(zen.from_arcmin()).azimuth(azi);
+                    let mut rays: Rays = Rays::from_mesh(&delaunay, rays_builder)?;
+                    let modes = rays
+                        .trace(&mut gmt)
+                        .opds_centered(&delaunay)
+                        .unwrap()
+                        .as_zernikes(4)
+                        .reduce_into(PUPIL_MODES);
+                    Ok(FieldZernike::new((zen, azi), modes))
+                })
+                .collect::<Result<Set<FieldZernike>, CrseoError>>()
+                .unwrap();
+            field_zernikes.as_zernikes(4)
+        }));
     }
     println!();
+
+    let results: Vec<_> = results.into_iter().map(|res| res.join().unwrap()).collect();
+    println!("Elapsed time: {:.3?}", now.elapsed());
 
     'pupil: for j in 0.. {
         'field: for k in 0.. {

@@ -159,16 +159,16 @@ impl AsZernikes for Set<FieldZernike> {
 impl FieldZernikeCoefficients {
     /// Returns the mean of the field maps of Zernike coefficient
     pub fn mean(&self, field: &Mesh) -> Vec<f64> {
-        let areas = field.triangle_areas();
+        let weights = field.lump_mass_matrix_weights();
+        let area = field.area();
         self.iter()
             .map(|mode| {
-                field
-                    .triangle_iter()
-                    .map(|idx| idx.iter().map(|idx| mode.mode[*idx]).sum::<f64>() / 3f64)
-                    .zip(areas.iter())
-                    .map(|(vertex_mean, area)| area * vertex_mean)
+                mode.mode
+                    .iter()
+                    .zip(&weights)
+                    .map(|(c, w)| c * w)
                     .sum::<f64>()
-                    / areas.len() as f64
+                    / area
             })
             .collect()
     }
