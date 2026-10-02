@@ -3,7 +3,7 @@
 use faer::{Mat, MatRef};
 use serde::{Deserialize, Serialize};
 
-use crate::{Mesh, Set};
+use crate::{Mesh, Set, opd::Opds};
 
 /// A Zernike mode or a Zernike coefficient field map
 ///
@@ -53,6 +53,7 @@ pub trait Zernike {
     }
     /// Computes the pseudo-inverse of the Zernike basis
     fn pseudo_inverse(&self) -> Mat<f64>;
+    fn weighted_pseudo_inverse(&self, weights: &[f64]) -> Mat<f64>;
     /// Returns the indices of the Zernike modes
     fn jnm(&self) -> Vec<(usize, usize, usize)>;
     /// Returns the coefficients of the Zernike modes
@@ -69,6 +70,23 @@ impl<C: Clone> Zernike for Set<Mode<C>> {
         let ncols = self.len();
         let nrows = self[0].mode.len();
         let zerns: Vec<_> = self.iter().flat_map(|mode| mode.mode.to_vec()).collect();
+        let mat = faer::MatRef::from_column_major_slice(&zerns, nrows, ncols);
+        let svd = mat.svd().unwrap();
+        svd.pseudoinverse()
+    }
+    fn weighted_pseudo_inverse(&self, weights: &[f64]) -> Mat<f64> {
+        let ncols = self.len();
+        let nrows = self[0].mode.len();
+        let zerns: Vec<_> = self
+            .iter()
+            .flat_map(|mode| {
+                mode.mode
+                    .iter()
+                    .zip(weights)
+                    .map(|(m, w)| m * w)
+                    .collect::<Vec<_>>()
+            })
+            .collect();
         let mat = faer::MatRef::from_column_major_slice(&zerns, nrows, ncols);
         let svd = mat.svd().unwrap();
         svd.pseudoinverse()
@@ -116,7 +134,32 @@ impl FieldZernike {
 pub trait AsZernikes {
     /// Type of the modal expansion
     type Into;
-    fn as_zernikes(&self, n_radial_order: usize) -> Self::Into;
+    fn as_zernikes(&self, n_radial_order: usize, mesh: &Mesh) -> Self::Into;
+}
+
+impl AsZernikes for Opds {
+    type Into = Set<Mode>;
+    /// Project OPDs on Zernike modes
+    fn as_zernikes(&self, n_radial_order: usize, mesh: &Mesh) -> Self::Into {
+        let weights: Vec<_> = mesh
+            .lump_mass_matrix_weights()
+            .into_iter()
+            .map(f64::sqrt)
+            .collect();
+        let mut zerns = Set::<Mode>::new(self.0.iter().map(|opd| &opd.xyz[..2]), n_radial_order);
+        let delta: Vec<_> = self
+            .0
+            .iter()
+            .zip(&weights)
+            .map(|(opd, w)| opd.delta * w)
+            .collect();
+        let mat = MatRef::<f64>::from_column_major_slice(&delta, delta.len(), 1);
+        let a = zerns.weighted_pseudo_inverse(&weights) * mat;
+        a.col(0).iter().zip(zerns.iter_mut()).for_each(|(c, z)| {
+            z.coef = *c;
+        });
+        zerns
+    }
 }
 
 /// Decomposition of Zernike coeffients field map in to Zernike modes
@@ -124,7 +167,12 @@ pub type FieldZernikeCoefficients = Set<Mode<Set<Mode>>>;
 
 impl AsZernikes for Set<FieldZernike> {
     type Into = FieldZernikeCoefficients;
-    fn as_zernikes(&self, n_radial_order: usize) -> Self::Into {
+    fn as_zernikes(&self, n_radial_order: usize, mesh: &Mesh) -> Self::Into {
+        let weights: Vec<_> = mesh
+            .lump_mass_matrix_weights()
+            .into_iter()
+            .map(f64::sqrt)
+            .collect();
         let xy: Vec<_> = self
             .iter()
             .map(|field| {
@@ -135,10 +183,15 @@ impl AsZernikes for Set<FieldZernike> {
             .collect();
         let mut zerns = Set::<Mode>::new(xy.iter().map(|xy| xy.as_slice()), n_radial_order);
         let n_mode = self.0[0].modes.len();
-        let pinv = zerns.pseudo_inverse();
+        let pinv = zerns.weighted_pseudo_inverse(&weights);
         let mut modes = vec![];
         for i in 0..n_mode {
-            let c: Vec<_> = self.iter().map(|field| field.modes[i].coef).collect();
+            let c: Vec<_> = self
+                .iter()
+                .map(|field| field.modes[i].coef)
+                .zip(&weights)
+                .map(|(c, w)| c * w)
+                .collect();
             let mat = MatRef::<f64>::from_column_major_slice(&c, c.len(), 1);
             let a = &pinv * mat;
 

@@ -29,7 +29,7 @@ fn main() -> anyhow::Result<()> {
             let rays_builder = Rays::builder().zenith(zen.from_arcmin()).azimuth(azi);
             let mut rays: Rays = Rays::from_mesh(&delaunay, rays_builder)?;
             let opds = rays.trace(&mut gmt).opds_centered(&delaunay).unwrap();
-            let modes = opds.as_zernikes(4).reduce_into([5, 6]);
+            let modes = opds.as_zernikes(4, &delaunay).reduce_into([5, 6]);
             Ok(FieldZernike::new((zen, azi), modes))
         })
         .collect::<Result<Set<FieldZernike>, CrseoError>>()?;
@@ -41,7 +41,7 @@ fn main() -> anyhow::Result<()> {
         Default::default(),
     )?;
 
-    let field_zern_coefs = field_zernikes.as_zernikes(4);
+    let field_zern_coefs = field_zernikes.as_zernikes(4, &field_mesh);
     dbg!(field_zern_coefs.mean(&field_mesh));
     for fzc in field_zern_coefs.into_iter() {
         println!("{:?}", fzc.jnm);

@@ -25,7 +25,7 @@ fn main() -> anyhow::Result<()> {
         write!(lock, "{id}").unwrap();
         lock.flush().unwrap();
         results.push(thread::spawn(move || {
-            let field_mesh = Mesh::disc(20f64, 0.5, None);
+            let field_mesh = Mesh::disc(20f64, 2., None);
             let delaunay = Mesh::gmt_segment_with_id(id).unwrap();
 
             let mut gmt = Gmt::new().unwrap();
@@ -42,13 +42,13 @@ fn main() -> anyhow::Result<()> {
                         .trace(&mut gmt)
                         .opds_centered(&delaunay)
                         .unwrap()
-                        .as_zernikes(4)
+                        .as_zernikes(4, &delaunay)
                         .reduce_into(PUPIL_MODES);
                     Ok(FieldZernike::new((zen, azi), modes))
                 })
                 .collect::<Result<Set<FieldZernike>, CrseoError>>()
                 .unwrap();
-            field_zernikes.as_zernikes(4)
+            field_zernikes.as_zernikes(4, &field_mesh)
         }));
     }
     println!();

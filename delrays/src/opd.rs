@@ -2,13 +2,9 @@
 
 use std::fmt::Display;
 
-use faer::MatRef;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    Set,
-    zernikes::{AsZernikes, Mode, Zernike},
-};
+use crate::Set;
 
 /// Single ray optical path difference
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
@@ -30,20 +26,6 @@ impl Opd {
 /// Rays optical path differences
 pub type Opds = Set<Opd>;
 
-impl AsZernikes for Opds {
-    type Into = Set<Mode>;
-    /// Project OPDs on Zernike modes
-    fn as_zernikes(&self, n_radial_order: usize) -> Self::Into {
-        let mut zerns = Set::<Mode>::new(self.0.iter().map(|opd| &opd.xyz[..2]), n_radial_order);
-        let delta: Vec<_> = self.0.iter().map(|opd| opd.delta).collect();
-        let mat = MatRef::<f64>::from_column_major_slice(&delta, delta.len(), 1);
-        let a = zerns.pseudo_inverse() * mat;
-        a.col(0).iter().zip(zerns.iter_mut()).for_each(|(c, z)| {
-            z.coef = *c;
-        });
-        zerns
-    }
-}
 impl Opds {
     /// Substract two OPDs
     ///
