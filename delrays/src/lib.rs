@@ -1,6 +1,7 @@
 //! # Field aberrations for 2 mirror telescopes
 
 pub mod delaunay;
+pub mod field_height;
 pub mod gmt;
 pub mod inversion;
 pub mod opd;
