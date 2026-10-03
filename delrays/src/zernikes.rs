@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::{Mesh, Set};
 
 mod r#as;
+pub mod fmt;
 pub use r#as::AsZernikes;
 
 /// Decomposition of Zernike coeffients field map in to Zernike modes
