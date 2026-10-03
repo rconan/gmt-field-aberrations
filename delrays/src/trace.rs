@@ -30,6 +30,13 @@ pub trait Trace {
     fn opds(&mut self) -> Self::OpdData;
     /// Retrieves the [Rays] OPD with cooordinates centered on mesh origin
     fn opds_centered(&mut self, mesh: &Mesh) -> Option<Self::OpdData>;
+    /// Retrieves the [Rays] OPD at the ray launch (entrance-pupil) coordinates,
+    /// centered on mesh origin
+    ///
+    /// Unlike [Trace::opds_centered], the coordinates do not depend on the field:
+    /// the segment is the same disc for every field point, as assumed by the
+    /// double-Zernike expansion of the wave aberration
+    fn opds_entrance(&mut self, mesh: &Mesh) -> Self::OpdData;
 }
 impl Trace for Rays {
     type From = Delaunay;
@@ -65,6 +72,21 @@ impl Trace for Rays {
             .for_each(|Opd { xyz, .. }| xyz.iter_mut().zip(origin).for_each(|(x, o)| *x -= o));
         Some(opds)
     }
+
+    fn opds_entrance(&mut self, mesh: &Mesh) -> Self::OpdData {
+        let origin = mesh
+            .vertex_iter()
+            .nth(mesh.origin_vertex_position())
+            .map(|xy| [xy[0], xy[1]])
+            .unwrap();
+        mesh.vertex_iter()
+            .zip(self.optical_path_difference())
+            .map(|(xy, delta)| Opd {
+                xyz: [xy[0] - origin[0], xy[1] - origin[1], 0f64],
+                delta,
+            })
+            .collect()
+    }
 }
 impl Trace for Set<Rays> {
     type From = Set<Mesh>;
@@ -92,6 +114,12 @@ impl Trace for Set<Rays> {
     fn opds_centered(&mut self, mesh: &Mesh) -> Option<Self::OpdData> {
         self.iter_mut()
             .map(|rays| rays.opds_centered(mesh))
+            .collect()
+    }
+
+    fn opds_entrance(&mut self, mesh: &Mesh) -> Self::OpdData {
+        self.iter_mut()
+            .map(|rays| rays.opds_entrance(mesh))
             .collect()
     }
 }

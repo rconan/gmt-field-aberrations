@@ -60,6 +60,5 @@ impl<'a> Display for SegmentsDoubleZernikesFormat<'a> {
                 writeln!(f)?;
             }
         }
-        todo!()
     }
 }

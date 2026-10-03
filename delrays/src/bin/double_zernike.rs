@@ -41,10 +41,15 @@ fn main() -> anyhow::Result<()> {
                 .map(|(zen, azi)| {
                     let rays_builder = Rays::builder().zenith(zen.from_arcmin()).azimuth(azi);
                     let mut rays: Rays = Rays::from_mesh(&delaunay, rays_builder)?;
-                    let modes = rays
-                        .trace(&mut gmt)
-                        .opds_centered(&delaunay)
-                        .unwrap()
+                    let rays = rays.trace(&mut gmt);
+                    // ENTRANCE=1 fits the segment OPD at the ray launch coordinates
+                    // (entrance pupil) instead of the exit-pupil sphere intercepts
+                    let opds = if std::env::var("ENTRANCE").is_ok() {
+                        rays.opds_entrance(&delaunay)
+                    } else {
+                        rays.opds_centered(&delaunay).unwrap()
+                    };
+                    let modes = opds
                         .as_zernikes(4, &delaunay)
                         .reduce_into(PUPIL_MODES);
                     Ok(FieldZernike::new((zen, azi), modes))
@@ -61,28 +66,5 @@ fn main() -> anyhow::Result<()> {
 
     println!("{}", SegmentsDoubleZernikesFormat::from(&segments).width(9).precision(3));
 
-    // 'pupil: for j in 0.. {
-    //     'field: for k in 0.. {
-    //         for (i, field_zern_coefs) in segments.iter().enumerate() {
-    //             let Some(fzc) = field_zern_coefs.get(j) else {
-    //                 break 'pupil;
-    //             };
-    //             let coef = fzc.coef.clone().reduce_into(1..=8);
-    //             let jnm = coef.jnm();
-    //             let coef = coef.coefficients();
-    //             let Some((jnm, c)) = jnm.get(k).zip(coef.get(k)) else {
-    //                 break 'field;
-    //             };
-    //             if i == 0 {
-    //                 if k == 0 {
-    //                     println!("{:?}", fzc.jnm);
-    //                 }
-    //                 print!(" {:2?}: ", jnm);
-    //             }
-    //             print!("{:+9.3}", c * 1e9);
-    //         }
-    //         println!()
-    //     }
-    // }
     Ok(())
 }
