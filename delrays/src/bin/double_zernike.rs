@@ -7,6 +7,7 @@ use std::{
 use crseo::{CrseoError, FromBuilder, raytracing::Rays};
 use delrays::{
     Gmt, Mesh, Set, Trace,
+    inversion::{DoubleZernikes, Layout},
     zernikes::{
         AsZernikes, FieldZernike, SegmentsDoubleZernikes, Zernike,
         fmt::SegmentsDoubleZernikesFormat,
@@ -65,6 +66,15 @@ fn main() -> anyhow::Result<()> {
     println!("\nElapsed time: {:.3?}", now.elapsed());
 
     println!("{}", SegmentsDoubleZernikesFormat::from(&segments).width(9).precision(3));
+
+    // aberration coefficients Ω_klm (nm) from pupil astigmatism and coma
+    let layout = if std::env::var("ENTRANCE").is_ok() {
+        Layout::entrance()
+    } else {
+        Layout::exit()
+    };
+    let omega = DoubleZernikes::from(&segments).scaled(1e9).invert(&layout);
+    println!("Aberration coefficients (nm):\n{omega:.4}");
 
     Ok(())
 }

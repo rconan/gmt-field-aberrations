@@ -2,6 +2,7 @@
 
 pub mod delaunay;
 pub mod gmt;
+pub mod inversion;
 pub mod opd;
 pub mod pickle;
 mod set;

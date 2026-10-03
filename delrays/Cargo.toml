@@ -8,6 +8,7 @@ default-run = "main"
 anyhow.workspace = true
 crseo.workspace = true
 faer = "0.24.4"
+num-complex = "0.4"
 plotters = "0.3.7"
 serde.workspace = true
 serde-pickle.workspace = true
