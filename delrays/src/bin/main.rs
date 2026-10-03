@@ -25,7 +25,7 @@ fn main() -> anyhow::Result<()> {
     println!("{}", Stats::from(&opds));
     serde_pickle::to_writer(&mut File::create("opds.pkl")?, &opds, Default::default())?;
 
-    let zs = opds.as_zernikes(4);
+    let zs = opds.as_zernikes(4, &delaunay);
     println!("{:+6.0?}", zs.speye());
     dbg!(zs.coefficients());
 

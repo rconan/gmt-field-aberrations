@@ -48,6 +48,9 @@ impl Display for Mesh {
 }
 impl Mesh {
     /// Returns the weights of the mesh lump mass matrix
+    ///
+    /// The weights are the sum of 1/3 of the areas of the triangles
+    /// that vertices belongs to
     pub fn lump_mass_matrix_weights(&self) -> Vec<f64> {
         let mut weights = vec![0f64; self.n_vertices()];
         let areas = self.triangle_areas();
