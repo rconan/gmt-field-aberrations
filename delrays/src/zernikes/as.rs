@@ -1,6 +1,6 @@
 use faer::MatRef;
 
-use super::{FieldZernike, Mode, Zernike};
+use super::{FieldZernike, FieldZernikeCoefficients, Mode, Zernike};
 use crate::{Mesh, Set, opd::Opds};
 
 /// Decomposition into Zernike modes
@@ -37,9 +37,6 @@ impl AsZernikes for Opds {
         zerns
     }
 }
-
-/// Decomposition of Zernike coeffients field map in to Zernike modes
-pub type FieldZernikeCoefficients = Set<Mode<Set<Mode>>>;
 
 impl AsZernikes for Set<FieldZernike> {
     type Into = FieldZernikeCoefficients;
@@ -83,23 +80,5 @@ impl AsZernikes for Set<FieldZernike> {
             });
         }
         modes.into_iter().collect()
-    }
-}
-
-impl FieldZernikeCoefficients {
-    /// Returns the mean of the field maps of Zernike coefficient
-    pub fn mean(&self, field: &Mesh) -> Vec<f64> {
-        let weights = field.lump_mass_matrix_weights();
-        let area = field.area();
-        self.iter()
-            .map(|mode| {
-                mode.mode
-                    .iter()
-                    .zip(&weights)
-                    .map(|(c, w)| c * w)
-                    .sum::<f64>()
-                    / area
-            })
-            .collect()
     }
 }

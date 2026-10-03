@@ -3,10 +3,34 @@
 use faer::Mat;
 use serde::{Deserialize, Serialize};
 
-use crate::Set;
+use crate::{Mesh, Set};
 
 mod r#as;
-pub use r#as::{AsZernikes, FieldZernikeCoefficients};
+pub use r#as::AsZernikes;
+
+/// Decomposition of Zernike coeffients field map in to Zernike modes
+pub type FieldZernikeCoefficients = Set<Mode<Set<Mode>>>;
+
+impl FieldZernikeCoefficients {
+    /// Returns the mean of the field maps of Zernike coefficient
+    pub fn mean(&self, field: &Mesh) -> Vec<f64> {
+        let weights = field.lump_mass_matrix_weights();
+        let area = field.area();
+        self.iter()
+            .map(|mode| {
+                mode.mode
+                    .iter()
+                    .zip(&weights)
+                    .map(|(c, w)| c * w)
+                    .sum::<f64>()
+                    / area
+            })
+            .collect()
+    }
+}
+
+/// GMT segment double zernike expansion
+pub type SegmentsDoubleZernikes = Set<FieldZernikeCoefficients>;
 
 /// A Zernike mode or a Zernike coefficient field map
 ///

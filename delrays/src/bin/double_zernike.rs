@@ -7,24 +7,26 @@ use std::{
 use crseo::{CrseoError, FromBuilder, raytracing::Rays};
 use delrays::{
     Gmt, Mesh, Set, Trace,
-    zernikes::{AsZernikes, FieldZernike, Zernike},
+    zernikes::{
+        AsZernikes, FieldZernike, FieldZernikeCoefficients, SegmentsDoubleZernikes, Zernike,
+    },
 };
 use skyangle::Conversion;
 
-const PUPIL_MODES: [usize; 2] = [5, 6];
+const PUPIL_MODES: [usize; 4] = [5, 6, 7, 8];
 
 fn main() -> anyhow::Result<()> {
     // field_mesh.plot();
     // println!("{field_mesh}");
 
-    let mut lock = stdout().lock();
-
     let now = Instant::now();
     let mut results = vec![];
     for id in 1..=7 {
-        write!(lock, "{id}").unwrap();
-        lock.flush().unwrap();
         results.push(thread::spawn(move || {
+            let mut lock = stdout().lock();
+            write!(lock, "{id}").unwrap();
+            lock.flush().unwrap();
+
             let field_mesh = Mesh::disc(20f64, 2., None);
             let delaunay = Mesh::gmt_segment_with_id(id).unwrap();
 
@@ -51,14 +53,14 @@ fn main() -> anyhow::Result<()> {
             field_zernikes.as_zernikes(4, &field_mesh)
         }));
     }
-    println!();
 
-    let results: Vec<_> = results.into_iter().map(|res| res.join().unwrap()).collect();
-    println!("Elapsed time: {:.3?}", now.elapsed());
+    let segments: SegmentsDoubleZernikes =
+        results.into_iter().map(|res| res.join().unwrap()).collect();
+    println!("\nElapsed time: {:.3?}", now.elapsed());
 
     'pupil: for j in 0.. {
         'field: for k in 0.. {
-            for (i, field_zern_coefs) in results.iter().enumerate() {
+            for (i, field_zern_coefs) in segments.iter().enumerate() {
                 let Some(fzc) = field_zern_coefs.get(j) else {
                     break 'pupil;
                 };
@@ -74,7 +76,7 @@ fn main() -> anyhow::Result<()> {
                     }
                     print!(" {:2?}: ", jnm);
                 }
-                print!("{:+6.0}", c * 1e9);
+                print!("{:+9.3}", c * 1e9);
             }
             println!()
         }
