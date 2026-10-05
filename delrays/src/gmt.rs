@@ -43,8 +43,60 @@ pub fn paraxial_focus_z() -> f64 {
 pub fn exit_pupil_z() -> f64 {
     m2_paraxial_image(0.)
 }
-/// Focal surface radius
+/// Nominal focal surface radius (CEO value)
+///
+/// Within 2.1 mm of the medial surface of the prescription, [focal_surface_radius]
+/// with [FocalSurface::Medial]; the radius of the reference surface changes the
+/// field-cubic coma ω331 by 0.0056 nm and ω240 by 1.06e-4 nm per nm of field defocus
 pub const FOCAL_PLANE_RADIUS: f64 = 2.197173;
+
+/// Third-order focal surfaces
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FocalSurface {
+    Petzval,
+    Sagittal,
+    Medial,
+    Tangential,
+}
+
+/// Seidel astigmatism sum `S_III` of M1 and M2 for a unit marginal ray height at M1
+/// and a unit chief ray angle, stop at M1 (Welford's conventions: light along +z,
+/// `n' = -n` at a mirror, curvature `c = -1/r` with `r` the radius used by CEO)
+fn seidel_astigmatism() -> f64 {
+    // (curvature, conic constant, distance to the next mirror)
+    let mirrors = [
+        (-1. / m1::CURVATURE, -m1::CONIC, -m2::HEIGHT),
+        (-1. / m2::CURVATURE, -m2::CONIC, 0.),
+    ];
+    let (mut h, mut u, mut hb, mut ub, mut n) = (1f64, 0f64, 0f64, 1f64, 1f64);
+    let mut s3 = 0.;
+    for (c, k, d) in mirrors {
+        let np = -n;
+        let up = (n * u - h * c * (np - n)) / np;
+        let ubp = (n * ub - hb * c * (np - n)) / np;
+        let ab = n * (ub + hb * c);
+        let du = up / np - u / n;
+        s3 += -ab * ab * h * du + k * c.powi(3) * (np - n) * h * h * hb * hb;
+        (u, ub, n) = (up, ubp, np);
+        h += d * u;
+        hb += d * ub;
+    }
+    s3
+}
+
+/// Vertex radius of curvature \[m\] of a third-order focal surface of the telescope:
+/// `1/R = 2/r_1 + 2/r_2 - j S_III`, `j = 0, 1, 2, 3` for Petzval, sagittal, medial and
+/// tangential, with `S_III` from [seidel_astigmatism] (equal to `2|Ω222|/(R²θ²)`)
+pub fn focal_surface_radius(surface: FocalSurface) -> f64 {
+    let petzval = 2. / m1::CURVATURE - 2. / m2::CURVATURE;
+    let j = match surface {
+        FocalSurface::Petzval => 0.,
+        FocalSurface::Sagittal => 1.,
+        FocalSurface::Medial => 2.,
+        FocalSurface::Tangential => 3.,
+    };
+    1. / (petzval - j * seidel_astigmatism())
+}
 
 use crate::trace::RayTracing;
 
@@ -72,8 +124,12 @@ impl RayTracing for Gmt {
     fn ray_tracing(&mut self, rays: &mut Rays) {
         self.m1.trace(rays);
         self.m2.trace(rays);
-        // reference sphere centred at the paraxial focus (not the rounded FOCAL_PLANE_Z)
-        rays.to_sphere(paraxial_focus_z(), FOCAL_PLANE_RADIUS);
+        // reference sphere centred on the medial focal surface through the paraxial focus,
+        // both computed from the prescription (not the rounded FOCAL_PLANE_Z/RADIUS)
+        rays.to_sphere(
+            paraxial_focus_z(),
+            focal_surface_radius(FocalSurface::Medial),
+        );
     }
 }
 
@@ -88,5 +144,22 @@ mod tests {
         assert!((exit_pupil_z() - 17.9421102695571).abs() < 1e-11);
         // CEO's on-axis reference-sphere radius is z_E - FOCAL_PLANE_Z
         assert!((exit_pupil_z() - FOCAL_PLANE_Z - 23.772110269559725).abs() < 1e-11);
+    }
+
+    #[test]
+    fn focal_surfaces() {
+        // radii at which the ray-traced field defocus of each surface vanishes
+        let expected = [
+            (FocalSurface::Petzval, 1.86611),
+            (FocalSurface::Sagittal, 2.01728),
+            (FocalSurface::Medial, 2.19510),
+            (FocalSurface::Tangential, 2.40729),
+        ];
+        for (surface, r) in expected {
+            let radius = focal_surface_radius(surface);
+            assert!((radius - r).abs() < 1e-5, "{surface:?}: {radius} vs {r}");
+        }
+        // the CEO value is within 2.1 mm of the medial surface
+        assert!((focal_surface_radius(FocalSurface::Medial) - FOCAL_PLANE_RADIUS).abs() < 2.2e-3);
     }
 }
