@@ -7,7 +7,10 @@ use std::{
 use crseo::{CrseoError, FromBuilder, raytracing::Rays};
 use delrays::{
     Gmt, Mesh, Set, Trace,
-    inversion::{DoubleZernikes, Layout},
+    inversion::{
+        DoubleZernikes, Layout,
+        lsq::{Coefficients, Design, terms},
+    },
     zernikes::{
         AsZernikes, FieldZernike, SegmentsDoubleZernikes, Zernike,
         fmt::SegmentsDoubleZernikesFormat,
@@ -15,15 +18,35 @@ use delrays::{
 };
 use skyangle::Conversion;
 
-const PUPIL_MODES: [usize; 4] = [5, 6, 7, 8];
+/// Pupil Noll modes from `DZ_PUPIL_MODES`, e.g. "5-8" (default) or "1-10" or "4,5,6,7,8"
+fn pupil_modes() -> Vec<usize> {
+    let spec = std::env::var("DZ_PUPIL_MODES").unwrap_or_else(|_| "5-8".into());
+    spec.split(',')
+        .flat_map(|item| match item.split_once('-') {
+            Some((a, b)) => (a.trim().parse::<usize>().expect("DZ_PUPIL_MODES")
+                ..=b.trim().parse::<usize>().expect("DZ_PUPIL_MODES"))
+                .collect::<Vec<_>>(),
+            None => vec![item.trim().parse::<usize>().expect("DZ_PUPIL_MODES")],
+        })
+        .collect()
+}
+/// Radial order of the field fit from `DZ_FIELD_ORDER` (default: 3)
+fn field_order() -> usize {
+    std::env::var("DZ_FIELD_ORDER")
+        .map(|s| s.parse().expect("DZ_FIELD_ORDER"))
+        .unwrap_or(3)
+}
 
 fn main() -> anyhow::Result<()> {
     // field_mesh.plot();
     // println!("{field_mesh}");
 
+    let pupil = pupil_modes();
+    let field_order = field_order();
     let now = Instant::now();
     let mut results = vec![];
     for id in 1..=7 {
+        let pupil = pupil.clone();
         results.push(thread::spawn(move || {
             let mut lock = stdout().lock();
             write!(lock, "{id}").unwrap();
@@ -52,12 +75,12 @@ fn main() -> anyhow::Result<()> {
                     };
                     let modes = opds
                         .as_zernikes(4, &delaunay)
-                        .reduce_into(PUPIL_MODES);
+                        .reduce_into(pupil.iter().copied());
                     Ok(FieldZernike::new((zen, azi), modes))
                 })
                 .collect::<Result<Set<FieldZernike>, CrseoError>>()
                 .unwrap();
-            field_zernikes.as_zernikes(4, &field_mesh)
+            field_zernikes.as_zernikes(field_order + 1, &field_mesh)
         }));
     }
 
@@ -65,7 +88,14 @@ fn main() -> anyhow::Result<()> {
         results.into_iter().map(|res| res.join().unwrap()).collect();
     println!("\nElapsed time: {:.3?}", now.elapsed());
 
-    println!("{}", SegmentsDoubleZernikesFormat::from(&segments).width(9).precision(3));
+    let n_field = (field_order + 1) * (field_order + 2) / 2;
+    println!(
+        "{}",
+        SegmentsDoubleZernikesFormat::from(&segments)
+            .width(9)
+            .precision(3)
+            .field_modes(n_field)
+    );
 
     // aberration coefficients Ω_klm (nm) from pupil astigmatism and coma
     let layout = if std::env::var("ENTRANCE").is_ok() {
@@ -73,8 +103,24 @@ fn main() -> anyhow::Result<()> {
     } else {
         Layout::exit()
     };
-    let omega = DoubleZernikes::from(&segments).scaled(1e9).invert(&layout);
-    println!("Aberration coefficients (nm):\n{omega:.4}");
+    if [5, 6, 7, 8].iter().all(|j| pupil.contains(j)) && field_order >= 3 {
+        let omega = DoubleZernikes::from(&segments).scaled(1e9).invert(&layout);
+        println!("Aberration coefficients, closed form (nm):\n{omega:.4}");
+    }
+
+    // least squares, with all the pupil and field modes, when the field fit reaches
+    // radial order 5 (model k<=5, l<=8 if segment defocus or trefoil is available, else l<=6)
+    if field_order >= 5 {
+        let data = Coefficients::from(&segments).scaled(1e9);
+        let lmax = if [4, 9, 10].iter().any(|j| pupil.contains(j)) {
+            8
+        } else {
+            6
+        };
+        let design = Design::new(terms(5, lmax, 3), data.pupil(), data.field(), &layout);
+        let solution = design.solve(&data)?;
+        println!("Aberration coefficients, least squares (nm):\n{solution:.4}");
+    }
 
     Ok(())
 }

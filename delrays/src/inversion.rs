@@ -26,6 +26,8 @@ use std::{f64::consts::PI, fmt, ops::Index, str::FromStr};
 
 use num_complex::Complex64 as C64;
 
+pub mod lsq;
+
 /// Number of segments (6 outer + 1 centre)
 pub const N_SEGMENT: usize = 7;
 /// Noll indices of the pupil modes: astigmatism (5, 6) and coma (7, 8)

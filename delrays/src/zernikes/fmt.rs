@@ -8,6 +8,7 @@ pub struct SegmentsDoubleZernikesFormat<'a> {
     scale: f64,
     width: usize,
     precision: usize,
+    field_modes: usize,
 }
 
 impl<'a> SegmentsDoubleZernikesFormat<'a> {
@@ -23,6 +24,11 @@ impl<'a> SegmentsDoubleZernikesFormat<'a> {
         self.precision = precision;
         self
     }
+    /// Number of field modes printed (default: 8)
+    pub fn field_modes(mut self, field_modes: usize) -> Self {
+        self.field_modes = field_modes;
+        self
+    }
 }
 
 impl<'a> From<&'a SegmentsDoubleZernikes> for SegmentsDoubleZernikesFormat<'a> {
@@ -32,6 +38,7 @@ impl<'a> From<&'a SegmentsDoubleZernikes> for SegmentsDoubleZernikesFormat<'a> {
             scale: 1e9,
             width: 6,
             precision: 0,
+            field_modes: 8,
         }
     }
 }
@@ -43,7 +50,7 @@ impl<'a> Display for SegmentsDoubleZernikesFormat<'a> {
                     let Some(fzc) = field_zern_coefs.get(j) else {
                         break 'pupil;
                     };
-                    let coef = fzc.coef.clone().reduce_into(1..=8);
+                    let coef = fzc.coef.clone().reduce_into(1..=self.field_modes);
                     let jnm = coef.jnm();
                     let coef = coef.coefficients();
                     let Some((jnm, c)) = jnm.get(k).zip(coef.get(k)) else {
