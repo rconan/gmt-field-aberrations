@@ -62,7 +62,7 @@ add `model/`, `field_height/` and `rigid_body/` to `sys.path` themselves.
 - `figtrace.py`: ray trace showing that an M1 figure error is the same at every field point.
 - `figerr.py`–`figerr4.py`: M1 figure error in the collimation scheme. Covers the response, degeneracies and strategies with noise.
 - `figgeom.py`–`figgeom3.py`: dependence on where the 3 field points are, and figure errors that M1+M2 motions mimic.
-- `diffscheme.py`, `diffscheme2.py`: differential scheme. Differences between field points remove the figure error; M2 is derived from them and the field mean is corrected by M1 bending. Includes the noise sweep.
+- `diffscheme.py`–`diffscheme3.py`: differential scheme. Differences between field points remove the figure error; M2 is derived from them and the field mean is corrected by M1 bending. Includes the noise sweep (`diffscheme2.py`) and the comparison with the field-height collimation (`diffscheme3.py`).
 
 ## Regenerating the large files
 
