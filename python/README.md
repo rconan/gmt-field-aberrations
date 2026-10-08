@@ -64,6 +64,11 @@ add `model/`, `field_height/` and `rigid_body/` to `sys.path` themselves.
 - `figgeom.py`–`figgeom3.py`: dependence on where the 3 field points are, and figure errors that M1+M2 motions mimic.
 - `diffscheme.py`–`diffscheme3.py`: differential scheme. Differences between field points remove the figure error; M2 is derived from them and the field mean is corrected by M1 bending. Includes the noise sweep (`diffscheme2.py`) and the comparison with the field-height collimation (`diffscheme3.py`).
 - `sensors.py`: edge sensors on M1 or M2. Posterior uncertainty of the misalignments, the figure error and the collimation state for different sensor sets.
+- `shmodel.py`: Shack-Hartmann model (48x48 subapertures, Fried geometry). Writes `sh.npy`, the centroid sensitivities to the M1/M2 DOFs and the figure modes at the 3 probes.
+- `shnoise.py`: noise propagation from centroids to segment Noll 2-8, and the mean slope of coma.
+- `shtilt.py`: segment tilt at the 3 field points for the motions that mimic figure errors.
+- `shstrat.py`: the figure-error strategies with centroids vs Noll 4-8 + line of sight. Arguments: centroid noise (mas), probe calibration offsets (nm).
+- `shsensors.py`: posterior uncertainties with centroids and segment-position sensors. Argument: centroid noise (mas).
 
 ## Regenerating the large files
 
